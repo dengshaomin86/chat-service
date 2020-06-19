@@ -18,6 +18,28 @@ module.exports = appInfo => {
   // add your middleware config here
   config.middleware = [];
 
+  // 连接mongodb的配置
+  config.mongoose = {
+    client: {
+      url: 'mongodb://127.0.0.1:27017/chatEgg',
+      options: {},
+    },
+  };
+
+  // 设置跨域访问
+  config.security = {
+    csrf: {
+      enable: false
+    },
+    domainWhiteList: [ '*' ]
+  };
+  config.cors = {
+    // origin: '*',
+    origin: ['http://localhost:8080'],
+    credentials: true,
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS'
+  };
+
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',
