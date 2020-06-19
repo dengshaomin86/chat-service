@@ -18,6 +18,14 @@ module.exports = app => {
       minlength: 2,
       maxlength: 30,
     },
+    nickname: {
+      type: String,
+      default: () => ""
+    },
+    sex: {
+      type: String,
+      default: () => "0"
+    },
     hobby: {
       type: String,
       default: () => ""

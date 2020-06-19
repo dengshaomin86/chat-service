@@ -2,6 +2,7 @@
 
 // const Controller = require('egg').Controller;
 const Controller = require('../core/baseController');
+const pick = require("lodash").pick;
 
 class UserController extends Controller {
   async index() {
@@ -9,19 +10,35 @@ class UserController extends Controller {
     ctx.body = 'user';
   }
 
-  async add() {
-    const {ctx} = this;
-    ctx.body = ctx.service.user.add();
-  }
-
   async delete() {
     await this.ctx.model[model].deleteOne({"_id": id});
   }
 
   async update() {
-    await this.ctx.model.Admin.updateOne({"_id": id}, {
-      mobile, email, role_id
-    })
+    const {ctx} = this;
+    const info = ctx.request.body;
+    if (ctx.session.username !== info.username) {
+      this.error({
+        message: "无权限修改"
+      });
+      return;
+    }
+    await ctx.model.User.updateOne({
+      username: info.username
+    }, {
+      nickname: info.nickname,
+      sex: info.sex,
+      hobby: info.hobby
+    }).then(res => {
+      this.success({
+        message: "修改成功"
+      });
+    }).catch(err => {
+      this.error({
+        message: "修改失败",
+        info: err
+      });
+    });
   }
 
   async find() {
@@ -46,9 +63,7 @@ class UserController extends Controller {
 
   async findAll() {
     const {ctx} = this;
-    let result = await ctx.model.User.find();
-    console.log('result***', result);
-    ctx.body = result;
+    ctx.body = await ctx.model.User.find();
   }
 
   // 注册
@@ -102,12 +117,42 @@ class UserController extends Controller {
         reject();
       });
     }).then(res => {
+      ctx.session.username = info.username;
       this.success({
         message: "登录成功"
       });
     }).catch(err => {
       this.error({
         message: "用户名或密码错误"
+      });
+    });
+  }
+
+  async getInfo() {
+    const {ctx} = this;
+    if (!ctx.session.username) {
+      this.error({
+        message: "您已掉线，请重新登录"
+      });
+      return;
+    }
+    await ctx.model.User.find({
+      username: ctx.session.username
+    }).then(res => {
+      if (!res.length) {
+        this.error({
+          message: "获取用户信息失败"
+        });
+        return;
+      }
+      const data = pick(res[0], ["username", "nickname", "sex", "hobby", "createDate"]);
+      this.success({
+        data
+      });
+    }).catch(err => {
+      this.error({
+        info: err,
+        message: "获取用户信息失败"
       });
     });
   }
