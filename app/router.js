@@ -25,6 +25,11 @@ module.exports = app => {
   router.get('/chat/getChatList', controller.chat.getChatList);
   router.get('/chat/getMsgList', controller.chat.getMsgList);
   router.get('/chat/getContactList', controller.chat.getContactList);
+  router.get('/chat/addContactFriend', controller.chat.addContactFriend);
+  router.get('/chat/getAddReqList', controller.chat.getAddReqList);
+  router.get('/chat/agreeAddFriendReq', controller.chat.agreeAddFriendReq);
+  router.get('/chat/refuseAddFriendReq', controller.chat.refuseAddFriendReq);
+  router.get('/chat/searchUser', controller.chat.searchUser);
 
   // socket
   io.of('/').route('chat', controller.chat.index);

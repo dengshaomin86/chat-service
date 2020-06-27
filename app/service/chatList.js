@@ -47,6 +47,11 @@ class ChatListService extends Service {
       }, data);
     }
   }
+
+  // 添加好友时给双方新增聊天记录
+  async bothAdd() {
+
+  }
 }
 
 module.exports = ChatListService;
