@@ -31,13 +31,37 @@ module.exports = appInfo => {
     csrf: {
       enable: false
     },
-    domainWhiteList: [ '*' ]
+    domainWhiteList: ['*']
   };
   config.cors = {
     // origin: '*',
     origin: ['http://localhost:8080'],
     credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS'
+  };
+
+  // session
+  config.session = {
+    key: 'SESSION_ID',  // 设置session cookie里面的key
+    maxAge: 30 * 60 * 1000, // 设置过期时间 30 分钟
+    httpOnly: true,
+    encrypt: true,
+    renew: true         // renew等于true 那么每次刷新页面的时候 session都会被延期
+  };
+
+  // socket.io
+  config.io = {
+    init: {},
+    namespace: {
+      '/': {
+        connectionMiddleware: ["auth"], // 这里我们可以做一些权限校验之类的操作
+        packetMiddleware: ["filter"], // 通常用于对消息做预处理，又或者是对加密消息的解密等操作
+      },
+      '/news': {
+        connectionMiddleware: [],
+        packetMiddleware: [],
+      },
+    },
   };
 
   // add your user config here

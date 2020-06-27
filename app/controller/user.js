@@ -1,6 +1,5 @@
 'use strict';
 
-// const Controller = require('egg').Controller;
 const Controller = require('../core/baseController');
 const pick = require("lodash").pick;
 
@@ -11,9 +10,11 @@ class UserController extends Controller {
   }
 
   async delete() {
-    await this.ctx.model[model].deleteOne({"_id": id});
+    const {ctx} = this;
+    await ctx.model["user"].deleteOne({"_id": id});
   }
 
+  // 更新用户信息
   async update() {
     const {ctx} = this;
     const info = ctx.request.body;
@@ -61,6 +62,7 @@ class UserController extends Controller {
     ctx.body = result;
   }
 
+  // 查找所有用户信息
   async findAll() {
     const {ctx} = this;
     ctx.body = await ctx.model.User.find();
@@ -71,7 +73,7 @@ class UserController extends Controller {
     const {ctx} = this;
     const info = ctx.request.body;
     const users = await ctx.model.User.find({
-      username: info.username
+      usernameLowercase: (info.username).toLowerCase()
     });
     if (users.length) {
       this.error({
@@ -85,10 +87,7 @@ class UserController extends Controller {
       });
       return;
     }
-    await ctx.service.user.add({
-      username: info.username,
-      password: info.password
-    }).then(res => {
+    await ctx.service.user.add(info).then(res => {
       this.success({
         message: "注册成功"
       });
@@ -112,12 +111,13 @@ class UserController extends Controller {
           reject();
           return;
         }
-        resolve();
+        resolve(res[0]);
       }).catch(err => {
         reject();
       });
     }).then(res => {
-      ctx.session.username = info.username;
+      ctx.session.username = res.username;
+      ctx.session.userId = res.userId;
       this.success({
         message: "登录成功"
       });
@@ -128,6 +128,21 @@ class UserController extends Controller {
     });
   }
 
+  // 退出登录
+  async signOut() {
+    const {ctx} = this;
+    await ctx.service.online.remove().then(res => {
+      console.log("退出在线列表成功", res);
+      ctx.session.username = null;
+      this.success({
+        message: "退出成功"
+      });
+    }).catch(err => {
+      console.log("退出在线列表失败", err);
+    });
+  }
+
+  // 获取用户信息
   async getInfo() {
     const {ctx} = this;
     if (!ctx.session.username) {

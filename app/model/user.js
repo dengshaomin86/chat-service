@@ -12,6 +12,14 @@ module.exports = app => {
       minlength: 2,
       maxlength: 10,
     },
+    usernameLowercase: {
+      type: String,
+      lowercase: true
+    },
+    userId: {
+      type: String,
+      required: true,
+    },
     password: {
       type: String,
       required: true,
