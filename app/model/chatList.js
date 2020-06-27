@@ -1,5 +1,6 @@
 'use strict';
 
+// 聊天列表
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
@@ -16,7 +17,8 @@ module.exports = app => {
       type: String,
       required: true,
     },
-    chatList: {
+    // 即 chatId 的集合
+    list: {
       type: Array,
       default: () => []
     }

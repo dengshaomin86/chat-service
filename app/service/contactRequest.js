@@ -57,6 +57,7 @@ class ContactRequestService extends Service {
     // 没有当前用户的记录则新增一条
     let obj = {
       username: params.username,
+      userId: params.userId,
       list: [reqObj]
     };
     return await ctx.model.ContactRequest.create(obj);

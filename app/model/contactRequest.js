@@ -12,6 +12,10 @@ module.exports = app => {
       minlength: 2,
       maxlength: 10,
     },
+    userId: {
+      type: String,
+      required: true,
+    },
     list: {
       type: Array,
       default: () => []

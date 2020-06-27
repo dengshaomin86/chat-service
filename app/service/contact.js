@@ -30,6 +30,7 @@ async function createRelationship(ctx, data) {
   // 没有当前用户的记录则新增一条
   let obj = {
     username: data.username,
+    userId: data.userId,
     list: [friendObj]
   };
   return await ctx.model.Contact.create(obj);
@@ -44,10 +45,12 @@ class ContactService extends Service {
     // 给双方增加关系数据
     return await createRelationship(ctx, {
       username: ctx.session.username,
+      userId: ctx.session.userId,
       friendName: params.username,
       friendId: params.userId,
     }).then(await createRelationship(ctx, {
       username: params.username,
+      userId: params.userId,
       friendName: ctx.session.username,
       friendId: ctx.session.userId,
     }));

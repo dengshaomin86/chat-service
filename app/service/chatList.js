@@ -2,55 +2,111 @@
 
 const Service = require('egg').Service;
 
+function createChatId(fromUserId, toUserId) {
+  return `${Math.min(fromUserId, toUserId)}&${Math.max(fromUserId, toUserId)}`;
+}
+
 class ChatListService extends Service {
   // 新增聊天列表
   async add() {
     const {ctx} = this;
     const params = ctx.query;
 
-    const userChatList = await ctx.model.ChatList.find({
-      username: ctx.session.username
-    });
-
     let chatObj = null;
     if (params.type === "1") {
-      const chatId = `${Math.min(ctx.session.userId, params.userId)}&${Math.max(ctx.session.userId, params.userId)}`;
+      // 单聊
       chatObj = {
-        type: "1",
-        chatId,
-        name: params.username,
-        lastMsg: "hello",
-        lastMsgDate: new Date().getTime(),
-        lastMsgUser: ctx.session.username
+        chatId: createChatId(ctx.session.userId, params.userId),
+        chatType: "1",
+        msg: "",
+        msgDate: "",
+        msgType: "1",
+        toUsername: params.username,
+        toUserId: params.userId,
+        name: params.username
       };
     }
+    return chatObj;
+  }
 
-    if (!userChatList.length) {
-      // 没有用户聊天数据，则新增一张用户的聊天列表数据
-      let newUserChatList = {
-        username: ctx.session.username,
-        userId: ctx.session.userId,
-        chatList: [chatObj],
-      };
-      return await ctx.model.ChatList.create(newUserChatList);
+  // 更新聊天列表
+  async updateChatList(msgObj) {
+    const {ctx} = this;
+
+    // 发送方
+    let userChatList = await ctx.model.ChatList.find({
+      userId: msgObj.fromUserId
+    });
+    if (userChatList.length) {
+      let userChatObj = userChatList[0];
+      let idx = userChatObj.list.findIndex(item => item === msgObj.chatId);
+      if (idx !== -1) userChatObj.list.splice(idx, 1);
+      userChatObj.list.unshift(msgObj.chatId);
+      await ctx.model.ChatList.updateOne({
+        userId: msgObj.fromUserId
+      }, userChatObj);
     } else {
-      // 更新用户聊天列表数据
-      let data = userChatList[0];
-      if (data.chatList.find(item => item.chatId === chatObj.chatId)) {
-        return new Promise((resolve, reject) => {
-          reject("聊天已存在");
-        });
-      }
-      data.chatList.unshift(chatObj);
-      return await ctx.model.ChatList.updateOne({
-        username: ctx.session.username
-      }, data);
+      await ctx.model.ChatList.create({
+        username: msgObj.fromUsername,
+        userId: msgObj.fromUserId,
+        list: [msgObj.chatId]
+      });
+    }
+
+    // 接收方
+    userChatList = await ctx.model.ChatList.find({
+      userId: msgObj.toUserId
+    });
+    if (userChatList.length) {
+      let userChatObj = userChatList[0];
+      let idx = userChatObj.list.findIndex(item => item === msgObj.chatId);
+      if (idx !== -1) userChatObj.list.splice(idx, 1);
+      userChatObj.list.unshift(msgObj.chatId);
+      await ctx.model.ChatList.updateOne({
+        userId: msgObj.toUserId
+      }, userChatObj);
+    } else {
+      await ctx.model.ChatList.create({
+        username: msgObj.toUsername,
+        userId: msgObj.toUserId,
+        list: [msgObj.chatId]
+      });
     }
   }
 
-  // 添加好友时给双方新增聊天记录
-  async bothAdd() {
+  // 获取聊天列表
+  async getChatList() {
+    const {ctx} = this;
 
+    const userChatList = await ctx.model.ChatList.find({
+      userId: ctx.session.userId
+    });
+
+    let list = [];
+    if (userChatList.length && userChatList[0].list.length) {
+      let chatList = userChatList[0].list;
+      for (let item of chatList) {
+        // 获取最后一条信息
+        let msgList = await ctx.model.Message.find({
+          chatId: item
+        });
+        let obj = JSON.parse(JSON.stringify(msgList[msgList.length - 1]));
+        obj.name = obj.fromUserId === ctx.session.userId ? obj.toUsername : obj.fromUsername;
+        list.push(obj);
+      }
+    }
+
+    const defaultGroup = {
+      type: "2", // 群聊
+      chatId: "group001",
+      name: "群聊",
+      msg: "hello everyone",
+      msgDate: new Date("2020/06/26 13:13:13").getTime(),
+      msgUser: "dd1"
+    };
+    list.push(defaultGroup);
+
+    return list;
   }
 }
 

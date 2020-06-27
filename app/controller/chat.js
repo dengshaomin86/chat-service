@@ -4,7 +4,10 @@ const Controller = require('../core/baseController');
 const room = "default_room";
 
 class ChatController extends Controller {
-  async index1() {
+
+  // ****************************  socket  ****************************
+
+  async test() {
     const {ctx} = this;
     const {socket, app} = ctx;
     const params = ctx.args[0];
@@ -43,29 +46,51 @@ class ChatController extends Controller {
     const {app, socket, logger, helper} = ctx;
     const nsp = app.io.of('/');
     const id = socket.id;
+
+    // 拼装完整消息体
+    let msgObj = ctx.args[0];
+    msgObj.fromUsername = ctx.session.username;
+    msgObj.fromUserId = ctx.session.userId;
+
     // 根据 id 给指定连接发送消息（响应发送成功）
-    nsp.sockets[id].emit('messageResponse', ctx.args[0]);
+    nsp.sockets[id].emit('messageResponse', msgObj);
+
     // 查找对方是否在线
     const onlineList = await ctx.model.Online.find({
-      username: ctx.args[0].toUser
+      userId: msgObj.toUserId
     });
-    if (onlineList.length) {
-      nsp.sockets[onlineList[0].socketId].emit('message', ctx.args[0]);
+    if (onlineList.length && onlineList[0].socketId) {
+      try {
+        nsp.sockets[onlineList[0].socketId].emit('message', msgObj);
+      } catch (e) {
+      }
     }
+
     // 储存聊天记录
-    await ctx.service.message.add().then(res => {
+    await ctx.service.message.add(msgObj).then(res => {
       console.log("储存成功");
     }).catch(err => {
-      console.log("储存失败");
+      console.log("储存失败", err);
+    });
+
+    // 更新聊天列表
+    await ctx.service.chatList.updateChatList(msgObj).then(res => {
+      console.log("更新聊天列表成功");
+    }).catch(err => {
+      console.log("更新聊天列表失败", err);
     });
   }
+
+
+  // ****************************  http  ****************************
 
   // 新增聊天列表
   async addChatList() {
     const {ctx} = this;
     await ctx.service.chatList.add().then(res => {
       this.success({
-        message: "创建成功"
+        message: "创建成功",
+        data: res
       });
     }).catch(err => {
       this.error({
@@ -78,24 +103,15 @@ class ChatController extends Controller {
   // 聊天列表
   async getChatList() {
     const {ctx} = this;
-    const userChatList = await ctx.model.ChatList.find({
-      username: ctx.session.username
-    });
-    let list = [];
-    if (userChatList.length) {
-      list = userChatList[0].chatList;
-    }
-    const defaultGroup = {
-      type: "2", // 群聊
-      chatId: "group001",
-      name: "群聊",
-      lastMsg: "hello everyone",
-      lastMsgDate: new Date("2020/06/26 13:13:13").getTime(),
-      lastMsgUser: "dd1"
-    };
-    list.push(defaultGroup);
-    this.success({
-      list
+    await ctx.service.chatList.getChatList().then(list => {
+      this.success({
+        list
+      });
+    }).catch(err => {
+      this.error({
+        message: "获取列表失败",
+        info: err
+      });
     });
   }
 
@@ -111,7 +127,7 @@ class ChatController extends Controller {
     });
 
     if (messageList.length) {
-      list = messageList[0].list;
+      list = messageList;
     }
 
     if (params.chatId === "group001") {
