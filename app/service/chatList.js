@@ -96,14 +96,27 @@ class ChatListService extends Service {
       }
     }
 
-    const defaultGroup = {
-      type: "2", // 群聊
+    // 群聊数据
+    let defaultGroup = {
       chatId: "group001",
-      name: "群聊",
+      chatType: "2", // 群聊
+      name: "默认群聊",
       msg: "hello everyone",
-      msgDate: new Date("2020/06/26 13:13:13").getTime(),
-      msgUser: "dd1"
+      msgDate: new Date("2020/06/06 06:06:06").getTime(),
+      fromUsername: "管理员",
+      fromUserId: "001"
     };
+    // 获取最后一条信息
+    let msgGroupList = await ctx.model.MessageGroup.find({
+      chatId: "group001"
+    });
+    if (msgGroupList.length) {
+      let msgGroupObj = JSON.parse(JSON.stringify(msgGroupList[msgGroupList.length - 1]));
+      defaultGroup.msg = msgGroupObj.msg;
+      defaultGroup.msgDate = msgGroupObj.msgDate;
+      defaultGroup.fromUsername = msgGroupObj.fromUsername;
+      defaultGroup.fromUserId = msgGroupObj.fromUserId;
+    }
     list.push(defaultGroup);
 
     return list;

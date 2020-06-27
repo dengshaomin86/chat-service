@@ -81,6 +81,28 @@ class ChatController extends Controller {
     });
   }
 
+  // 群组聊天
+  async messageGroup() {
+    const {ctx} = this;
+    const {app, socket, logger, helper} = ctx;
+    const nsp = app.io.of('/');
+
+    // 拼装完整消息体
+    let msgObj = ctx.args[0];
+    msgObj.fromUsername = ctx.session.username;
+    msgObj.fromUserId = ctx.session.userId;
+
+    // 给指定房间的每个人发送消息
+    nsp.to(room).emit('messageResponse', msgObj);
+
+    // 储存聊天记录
+    await ctx.service.messageGroup.add(msgObj).then(res => {
+      console.log("储存成功");
+    }).catch(err => {
+      console.log("储存失败", err);
+    });
+  }
+
 
   // ****************************  http  ****************************
 
@@ -118,49 +140,15 @@ class ChatController extends Controller {
   // 对话列表
   async getMsgList() {
     const {ctx} = this;
-    const params = ctx.query;
-    let list = [];
-
-    // 查找是否有对应的聊天列表
-    const messageList = await ctx.model.Message.find({
-      chatId: params.chatId
-    });
-
-    if (messageList.length) {
-      list = messageList;
-    }
-
-    if (params.chatId === "group001") {
-      list = [
-        {
-          type: "2",
-          chatId: "group001",
-          msg: "hello everyone",
-          msgDate: "2020/06/27 12:12:12",
-          msgUser: "dd1",
-          msgType: "1"
-        },
-        {
-          type: "2",
-          chatId: "group001",
-          msg: "hello everyone2",
-          msgDate: "2020/06/27 12:12:12",
-          msgUser: "dd1",
-          msgType: "1"
-        },
-        {
-          type: "2",
-          chatId: "group001",
-          msg: "hello everyone3",
-          msgDate: "2020/06/27 12:12:12",
-          msgUser: "dd3",
-          msgType: "1"
-        }
-      ];
-    }
-
-    this.success({
-      list: list
+    await ctx.service.message.getMsgList().then(list => {
+      this.success({
+        list
+      });
+    }).catch(err => {
+      this.error({
+        message: "获取聊天记录失败",
+        info: err
+      });
     });
   }
 

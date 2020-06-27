@@ -34,6 +34,7 @@ module.exports = app => {
   // socket
   io.of('/').route('chat', controller.chat.index);
   io.of('/').route('message', controller.chat.message);
+  io.of('/').route('messageGroup', controller.chat.messageGroup);
   io.of('/').route('user', controller.chat.online);
 
   io.of('/news').route('news', controller.news.index);
