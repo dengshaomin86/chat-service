@@ -118,7 +118,7 @@ class ChatController extends Controller {
       list = [
         {
           type: "2",
-          chatId: "002",
+          chatId: "group001",
           msg: "hello everyone",
           msgDate: "2020/06/27 12:12:12",
           msgUser: "dd1",
@@ -126,7 +126,7 @@ class ChatController extends Controller {
         },
         {
           type: "2",
-          chatId: "002",
+          chatId: "group001",
           msg: "hello everyone2",
           msgDate: "2020/06/27 12:12:12",
           msgUser: "dd1",
@@ -134,7 +134,7 @@ class ChatController extends Controller {
         },
         {
           type: "2",
-          chatId: "002",
+          chatId: "group001",
           msg: "hello everyone3",
           msgDate: "2020/06/27 12:12:12",
           msgUser: "dd3",
