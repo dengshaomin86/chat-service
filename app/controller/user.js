@@ -1,7 +1,6 @@
 'use strict';
 
 const Controller = require('../core/baseController');
-const pick = require("lodash").pick;
 
 class UserController extends Controller {
   async index() {
@@ -145,24 +144,9 @@ class UserController extends Controller {
   // 获取用户信息
   async getInfo() {
     const {ctx} = this;
-    if (!ctx.session.username) {
-      this.error({
-        message: "您已掉线，请重新登录"
-      });
-      return;
-    }
-    await ctx.model.User.find({
-      username: ctx.session.username
-    }).then(res => {
-      if (!res.length) {
-        this.error({
-          message: "获取用户信息失败"
-        });
-        return;
-      }
-      const data = pick(res[0], ["username", "nickname", "sex", "hobby", "createDate"]);
+    await ctx.service.user.getInfo().then(res => {
       this.success({
-        data
+        data: res
       });
     }).catch(err => {
       this.error({

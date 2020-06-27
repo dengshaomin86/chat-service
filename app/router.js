@@ -17,7 +17,7 @@ module.exports = app => {
   router.post('/user/signIn', controller.user.signIn);
   router.post('/user/signUp', controller.user.signUp);
   router.get('/user/signOut', controller.user.signOut);
-  router.get('/user/getInfo', controller.user.getInfo);
+  router.post('/user/getInfo', controller.user.getInfo);
   router.post('/user/update', controller.user.update);
 
   // chat
