@@ -32,7 +32,7 @@ class MessageService extends Service {
         chatId: "group001",
         chatType: "2", // 群聊
         name: "默认群聊",
-        msg: "hello everyone",
+        msg: "goodnight",
         msgDate: new Date("2020/06/06 06:06:06").getTime(),
         fromUsername: "管理员",
         fromUserId: "001"
