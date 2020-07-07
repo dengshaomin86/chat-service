@@ -129,6 +129,23 @@ class UserService extends Service {
       resolve(pick(user, ["username", "avatar", "nickname"]));
     });
   }
+
+  async getAvatar(userId) {
+    const {ctx} = this;
+    let user = await ctx.model.User.find({
+      userId
+    });
+
+    if (!user.length) {
+      return new Promise((resolve, reject) => {
+        reject("用户不存在");
+      });
+    }
+
+    return new Promise((resolve, reject) => {
+      resolve(user[0].avatar);
+    });
+  }
 }
 
 module.exports = UserService;

@@ -92,6 +92,12 @@ class ChatListService extends Service {
         });
         let obj = JSON.parse(JSON.stringify(msgList[msgList.length - 1]));
         obj.name = obj.fromUserId === ctx.session.userId ? obj.toUsername : obj.fromUsername;
+        let userId = obj.fromUserId === ctx.session.userId ? obj.toUserId : obj.fromUserId;
+        await ctx.service.user.getAvatar(userId).then(url => {
+          obj.avatar = url;
+        }).catch(err => {
+          obj.avatar = defaultAvatar;
+        });
         list.push(obj);
       }
     }
@@ -104,7 +110,8 @@ class ChatListService extends Service {
       msg: "goodnight",
       msgDate: new Date("2020/06/06 06:06:06").getTime(),
       fromUsername: "管理员",
-      fromUserId: "001"
+      fromUserId: "001",
+      avatar: defaultAvatar
     };
     // 获取最后一条信息
     let msgGroupList = await ctx.model.MessageGroup.find({

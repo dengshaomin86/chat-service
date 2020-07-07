@@ -51,6 +51,17 @@ class ChatController extends Controller {
     let msgObj = ctx.args[0];
     msgObj.fromUsername = ctx.session.username;
     msgObj.fromUserId = ctx.session.userId;
+    await ctx.service.user.getAvatar(msgObj.fromUserId).then(url => {
+      msgObj.fromUserAvatar = url;
+    }).catch(err => {
+      msgObj.fromUserAvatar = defaultAvatar;
+    });
+
+    await ctx.service.user.getAvatar(msgObj.toUserId).then(url => {
+      msgObj.avatar = url;
+    }).catch(err => {
+      msgObj.avatar = defaultAvatar;
+    });
 
     // 根据 id 给指定连接发送消息（响应发送成功）
     nsp.sockets[id].emit('messageResponse', msgObj);
@@ -61,6 +72,7 @@ class ChatController extends Controller {
     });
     if (onlineList.length && onlineList[0].socketId) {
       try {
+        msgObj.avatar = msgObj.fromUserAvatar;
         nsp.sockets[onlineList[0].socketId].emit('message', msgObj);
       } catch (e) {
       }
@@ -91,6 +103,12 @@ class ChatController extends Controller {
     let msgObj = ctx.args[0];
     msgObj.fromUsername = ctx.session.username;
     msgObj.fromUserId = ctx.session.userId;
+    await ctx.service.user.getAvatar(msgObj.fromUserId).then(url => {
+      msgObj.fromUserAvatar = url;
+    }).catch(err => {
+      msgObj.fromUserAvatar = defaultAvatar;
+    });
+    msgObj.avatar = defaultAvatar;
 
     // 给指定房间的每个人发送消息
     nsp.to(room).emit('messageResponse', msgObj);

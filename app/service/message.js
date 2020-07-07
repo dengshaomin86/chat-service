@@ -39,7 +39,28 @@ class MessageService extends Service {
       });
     }
 
-    return list;
+    // 加入头像字段
+    let _list = [];
+    for (let item of list) {
+      if (item._id) item = item.toObject();
+      await ctx.service.user.getAvatar(item.fromUserId).then(url => {
+        item.fromUserAvatar = url;
+      }).catch(err => {
+        item.fromUserAvatar = defaultAvatar;
+      });
+      item.avatar = defaultAvatar;
+      if (params.chatId !== "group001") {
+        let userId = item.fromUserId === ctx.session.userId ? item.toUserId : item.fromUserId;
+        await ctx.service.user.getAvatar(userId).then(url => {
+          item.avatar = url;
+        }).catch(err => {
+          item.avatar = defaultAvatar;
+        });
+      }
+      _list.push(item);
+    }
+
+    return _list;
   }
 }
 

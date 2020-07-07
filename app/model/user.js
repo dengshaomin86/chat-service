@@ -3,6 +3,7 @@
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
+  console.log(defaultAvatar);
 
   const UserSchema = new Schema({
     username: {
@@ -28,7 +29,7 @@ module.exports = app => {
     },
     avatar: {
       type: String,
-      default: () => "/static/avatar/default.jpeg"
+      default: () => defaultAvatar
     },
     nickname: {
       type: String,

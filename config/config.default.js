@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require("path");
+global.defaultAvatar = "/static/avatar/default.jpeg";
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
