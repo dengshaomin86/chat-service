@@ -53,7 +53,7 @@ class UserService extends Service {
       });
     }
 
-    let obj = pick(list[0], ["username", "userId", "nickname", "sex", "hobby", "createDate"]);
+    let obj = pick(list[0], ["username", "userId", "avatar", "nickname", "sex", "hobby", "createDate"]);
 
     let status = "0"; // 0 未添加；1 已添加；2 待回应
     let statusText = "未添加"; // 0 未添加；1 已添加；2 待回应
@@ -82,6 +82,52 @@ class UserService extends Service {
     }
 
     return obj;
+  }
+
+  async update() {
+    const {ctx} = this;
+    const info = ctx.request.body;
+    if (ctx.session.username !== info.username) {
+      return new Promise((resolve, reject) => {
+        reject("无权限修改");
+      });
+    }
+    return await ctx.model.User.updateOne({
+      username: info.username
+    }, {
+      avatar: info.avatar,
+      nickname: info.nickname,
+      sex: info.sex,
+      hobby: info.hobby
+    });
+  }
+
+  async signIn() {
+    const {ctx} = this;
+    const info = ctx.request.body;
+    let user = await ctx.model.User.find({
+      username: info.username
+    });
+
+    if (!user.length) {
+      return new Promise((resolve, reject) => {
+        reject("用户不存在");
+      });
+    }
+
+    user = user[0];
+
+    if (info.password !== user.password) {
+      return new Promise((resolve, reject) => {
+        reject("密码错误");
+      });
+    }
+
+    return new Promise((resolve, reject) => {
+      ctx.session.username = user.username;
+      ctx.session.userId = user.userId;
+      resolve(pick(user, ["username", "avatar", "nickname"]));
+    });
   }
 }
 

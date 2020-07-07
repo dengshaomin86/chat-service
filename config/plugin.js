@@ -17,5 +17,10 @@ module.exports = {
   io: {
     enable: true,
     package: 'egg-socket.io'
+  },
+  // 模板
+  ejs: {
+    enable: true,
+    package: 'egg-view-ejs',
   }
 };

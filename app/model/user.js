@@ -26,6 +26,10 @@ module.exports = app => {
       minlength: 2,
       maxlength: 30,
     },
+    avatar: {
+      type: String,
+      default: () => "/static/avatar/default.jpeg"
+    },
     nickname: {
       type: String,
       default: () => ""

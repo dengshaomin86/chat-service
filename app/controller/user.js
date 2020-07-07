@@ -23,13 +23,7 @@ class UserController extends Controller {
       });
       return;
     }
-    await ctx.model.User.updateOne({
-      username: info.username
-    }, {
-      nickname: info.nickname,
-      sex: info.sex,
-      hobby: info.hobby
-    }).then(res => {
+    await ctx.service.user.update().then(res => {
       this.success({
         message: "修改成功"
       });
@@ -101,24 +95,10 @@ class UserController extends Controller {
   // 登录
   async signIn() {
     const {ctx} = this;
-    const info = ctx.request.body;
-    await new Promise((resolve, reject) => {
-      ctx.model.User.find({
-        username: info.username
-      }).then(res => {
-        if (info.password !== res[0].password) {
-          reject();
-          return;
-        }
-        resolve(res[0]);
-      }).catch(err => {
-        reject();
-      });
-    }).then(res => {
-      ctx.session.username = res.username;
-      ctx.session.userId = res.userId;
+    await ctx.service.user.signIn().then(user => {
       this.success({
-        message: "登录成功"
+        message: "登录成功",
+        user
       });
     }).catch(err => {
       this.error({
