@@ -11,7 +11,7 @@ module.exports = app => {
   // home
   router.get('/', controller.home.index);
   router.get('/checkOnline', userAuth, controller.home.checkOnline);
-  router.post('/uploadImg', controller.home.uploadImg);
+  router.post('/uploadImg', userAuth, controller.home.uploadImg);
 
   // view
   router.get('/view', controller.view.index);
@@ -19,25 +19,22 @@ module.exports = app => {
   router.get('/view/test2', controller.view.test2);
 
   // user
-  router.get('/user', controller.user.index);
-  router.get('/user/find/:username', controller.user.find);
-  router.get('/user/findAll', controller.user.findAll);
   router.post('/user/signIn', controller.user.signIn);
   router.post('/user/signUp', controller.user.signUp);
-  router.get('/user/signOut', controller.user.signOut);
+  router.get('/user/signOut', userAuth, controller.user.signOut);
   router.post('/user/getInfo', userAuth, controller.user.getInfo);
-  router.post('/user/update', controller.user.update);
+  router.post('/user/update', userAuth, controller.user.update);
 
   // chat
-  router.get('/chat/addChatList', controller.chat.addChatList);
-  router.get('/chat/getChatList', controller.chat.getChatList);
-  router.get('/chat/getMsgList', controller.chat.getMsgList);
-  router.get('/chat/getContactList', controller.chat.getContactList);
-  router.get('/chat/addContactFriend', controller.chat.addContactFriend);
-  router.get('/chat/getAddReqList', controller.chat.getAddReqList);
-  router.get('/chat/agreeAddFriendReq', controller.chat.agreeAddFriendReq);
-  router.get('/chat/refuseAddFriendReq', controller.chat.refuseAddFriendReq);
-  router.get('/chat/searchUser', controller.chat.searchUser);
+  router.get('/chat/addChatList', userAuth, controller.chat.addChatList);
+  router.get('/chat/getChatList', userAuth, controller.chat.getChatList);
+  router.get('/chat/getMsgList', userAuth, controller.chat.getMsgList);
+  router.get('/chat/getContactList', userAuth, controller.chat.getContactList);
+  router.get('/chat/addContactFriend', userAuth, controller.chat.addContactFriend);
+  router.get('/chat/getAddReqList', userAuth, controller.chat.getAddReqList);
+  router.get('/chat/agreeAddFriendReq', userAuth, controller.chat.agreeAddFriendReq);
+  router.get('/chat/refuseAddFriendReq', userAuth, controller.chat.refuseAddFriendReq);
+  router.get('/chat/searchUser', userAuth, controller.chat.searchUser);
 
   // socket
   io.of('/').route('chat', controller.chat.index);
