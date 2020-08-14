@@ -1,7 +1,7 @@
 {
-  "name": "chat-serve-egg",
+  "name": "chat-service",
   "version": "1.0.0",
-  "description": "chat serve",
+  "description": "chat service",
   "private": true,
   "egg": {
     "declarations": true
@@ -29,8 +29,8 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-chat-serve-egg",
-    "stop": "egg-scripts stop --title=egg-server-chat-serve-egg",
+    "start": "egg-scripts start --daemon --title=egg-server-chat-service",
+    "stop": "egg-scripts stop --title=egg-server-chat-service",
     "dev": "egg-bin dev --port 3000",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",

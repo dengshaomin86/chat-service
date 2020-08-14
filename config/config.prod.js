@@ -3,7 +3,7 @@
 'use strict';
 
 module.exports = appInfo => {
-  const config = exports = {};
+  const config = {};
 
   config.cluster = {
     listen: {

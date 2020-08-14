@@ -13,7 +13,7 @@ module.exports = appInfo => {
    * built-in config
    * @type {Egg.EggAppConfig}
    **/
-  const config = exports = {};
+  const config = {};
 
   config.cluster = {
     listen: {
