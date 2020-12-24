@@ -121,6 +121,35 @@ class ChatController extends Controller {
     });
   }
 
+  // 退出
+  async signOut() {
+    const {ctx} = this;
+    const {app, socket, logger, helper} = ctx;
+    const nsp = app.io.of('/');
+
+    // 踢出用户
+    const tick = (id, msg) => {
+      // 踢出用户前发送消息
+      nsp.sockets[id].emit('res', msg);
+      // 退出房间
+      ctx.socket.leave(room);
+
+      // 调用 adapter 方法踢出用户，客户端触发 disconnect 事件
+      // nsp.adapter.remoteDisconnect(id, true, err => {
+      //   logger.error(err);
+      // });
+    };
+
+    const {username} = ctx.session;
+    const user = await ctx.model.Online.findOne({
+      username
+    });
+
+    if (user && user.socketId) {
+      tick(user.socketId, "out");
+    }
+
+  }
 
   // ****************************  http  ****************************
 

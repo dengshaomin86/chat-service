@@ -1,16 +1,14 @@
 'use strict';
 
 const Service = require('egg').Service;
+const room = "default_room";
+
 class OnlineService extends Service {
   // 新增、更新在线用户
   async add() {
-    const { ctx } = this;
-    const username = ctx.session.username;
-    if (!username) {
-      return new Promise((resolve, reject) => {
-        reject("用户未登录");
-      });
-    }
+    const {ctx} = this;
+    const {username} = ctx.session;
+    if (!username) return false;
     const users = await ctx.model.User.find({
       usernameLowercase: (username).toLowerCase()
     });
@@ -36,11 +34,13 @@ class OnlineService extends Service {
   }
 
   // 删除在线用户
-  async remove () {
-    const { ctx } = this;
+  async remove() {
+    const {ctx} = this;
+    const {username} = ctx.session;
     return await ctx.model["Online"].deleteOne({
-      username: ctx.session.username
+      username
     });
   }
 }
+
 module.exports = OnlineService;
