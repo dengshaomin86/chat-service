@@ -19,21 +19,21 @@ class ContactRequestService extends Service {
       username: params.username
     });
 
-    // status 状态值：0 待回应；1 已同意；2 已拒绝
+    // status 状态值：0 待同意；1 已同意；2 已拒绝
     const reqObj = {
       username: ctx.session.username,
       userId: ctx.session.userId,
       msg: params.msg,
-      status: "0",
-      statusText: "待回应",
+      friendStatus: "0",
+      friendStatusText: "待同意",
     };
 
     if (reqList.length) {
       let data = reqList[0];
-      let record = data.list.find(item => item.username === ctx.session.username && item.status !== "2");
+      let record = data.list.find(item => item.username === ctx.session.username && item.friendStatus !== "2");
       if (record) {
         return new Promise((resolve, reject) => {
-          switch (record.status) {
+          switch (record.friendStatus) {
             case "0":
               resolve("请耐心等待对方回应");
               break;

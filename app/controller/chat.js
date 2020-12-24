@@ -200,8 +200,8 @@ class ChatController extends Controller {
     await ctx.service.contactRequest.add().then(res => {
       this.success({
         message: "成功发送好友请求，等待对方同意",
-        status: "2",
-        statusText: "待回应",
+        friendStatus: "2",
+        friendStatusText: "待同意",
       });
     }).catch(err => {
       this.error({
@@ -270,32 +270,32 @@ class ChatController extends Controller {
 
     let list = [];
     for (let item of userList) {
-      let status = "0"; // 0 未添加；1 已添加；2 待回应
-      let statusText = "未添加"; // 0 未添加；1 已添加；2 待回应
+      let friendStatus = "0"; // 0 未添加；1 已添加；2 待同意
+      let friendStatusText = "未添加";
 
       // 查找是否已经是好友
       let contact = await ctx.model.Contact.find({
         username: item.username
       });
       if (contact.length && contact[0].list.find(fri => fri.username === ctx.session.username)) {
-        status = "1";
-        statusText = "已添加";
+        friendStatus = "1";
+        friendStatusText = "已添加";
       }
 
       // 查找是否待回应
       let contactRequest = await ctx.model.ContactRequest.find({
         username: item.username
       });
-      if (contactRequest.length && contactRequest[0].list.find(fri => fri.username === ctx.session.username && fri.status === "0")) {
-        status = "2";
-        statusText = "待回应";
+      if (contactRequest.length && contactRequest[0].list.find(fri => fri.username === ctx.session.username && fri.friendStatus === "0")) {
+        friendStatus = "2";
+        friendStatusText = "待同意";
       }
 
       list.push({
         username: item.username,
         userId: item.userId,
-        status,
-        statusText
+        friendStatus,
+        friendStatusText
       });
     }
 

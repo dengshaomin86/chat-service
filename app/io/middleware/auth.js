@@ -6,18 +6,16 @@ module.exports = () => {
     // 权限校验通过
     ctx.socket.emit('res', 'auth success');
     // 加入在线列表
-    await ctx.service.online.add().then(res => {
+    await ctx.service.online.add().then(async (res) => {
       console.log("加入在线列表成功", res);
       ctx.socket.emit('res', '加入在线列表成功');
+      // 加入房间
+      ctx.socket.join(room);
+      // 放行
+      await next();
     }).catch(err => {
-      console.log("加入在线列表失败", err);
-      ctx.socket.emit('res', '加入在线列表失败');
+      // console.log("加入在线列表失败", err);
+      ctx.socket.emit('res', err);
     });
-    // 加入房间
-    ctx.socket.join(room);
-    // 放行
-    await next();
-    // yield* next;
-    console.log('断开连接');
   }
 };

@@ -35,11 +35,16 @@ module.exports = app => {
       type: String,
       default: () => ""
     },
+    // 性别：0保密；1男；2女
     sex: {
       type: String,
       default: () => "0"
     },
     hobby: {
+      type: String,
+      default: () => ""
+    },
+    signature: {
       type: String,
       default: () => ""
     },

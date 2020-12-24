@@ -32,17 +32,17 @@ class UserService extends Service {
     return await ctx.model.User.create(user);
   }
 
-  async getInfo() {
+  async getInfo(username) {
     const {ctx} = this;
     const params = ctx.request.body;
+    username = username || params.username;
 
-    if (!ctx.session.username) {
+    if (!username) {
       return new Promise((resolve, reject) => {
-        reject("您已掉线，请重新登录");
+        reject("用户不存在");
       });
     }
 
-    let username = params.username || ctx.session.username;
     let list = await ctx.model.User.find({
       username
     });
@@ -53,52 +53,67 @@ class UserService extends Service {
       });
     }
 
-    let obj = pick(list[0], ["username", "userId", "avatar", "nickname", "sex", "hobby", "createDate"]);
+    let obj = pick(list[0], ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
 
-    let status = "0"; // 0 未添加；1 已添加；2 待回应
-    let statusText = "未添加"; // 0 未添加；1 已添加；2 待回应
+    let friendStatus = "0"; // 0 未添加；1 已添加；2 待同意
+    let friendStatusText = "未添加"; // 0 未添加；1 已添加；2 待同意
 
-    if (params.username) {
+    if (username !== ctx.session.username) {
       // 查找是否已经是好友
       let contact = await ctx.model.Contact.find({
-        username: params.username
+        username
       });
       if (contact.length && contact[0].list.find(fri => fri.username === ctx.session.username)) {
-        status = "1";
-        statusText = "已添加";
+        friendStatus = "1";
+        friendStatusText = "好友";
       }
 
       // 查找是否待回应
       let contactRequest = await ctx.model.ContactRequest.find({
-        username: params.username
+        username
       });
       if (contactRequest.length && contactRequest[0].list.find(fri => fri.username === ctx.session.username && fri.status === "0")) {
-        status = "2";
-        statusText = "待回应";
+        friendStatus = "2";
+        friendStatusText = "待同意";
       }
-
-      obj.status = status;
-      obj.statusText = statusText;
     }
 
-    return obj;
+    return {
+      ...obj,
+      friendStatus,
+      friendStatusText
+    };
   }
 
   async update() {
     const {ctx} = this;
     const info = ctx.request.body;
-    if (ctx.session.username !== info.username) {
+    const {username} = ctx.session;
+
+    if (typeof info !== "object") {
       return new Promise((resolve, reject) => {
-        reject("无权限修改");
+        reject("参数有误");
       });
     }
-    return await ctx.model.User.updateOne({
-      username: info.username
-    }, {
-      avatar: info.avatar,
-      nickname: info.nickname,
-      sex: info.sex,
-      hobby: info.hobby
+
+    // 筛选可修改数据
+    const editable = ["avatar", "nickname", "sex", "hobby", "signature"];
+    let newInfo = {};
+    for (let key in info) {
+      if (editable.includes(key)) newInfo[key] = info[key];
+    }
+
+    let result = await ctx.model.User.updateOne({
+      username
+    }, newInfo);
+
+    return new Promise(async (resolve, reject) => {
+      if (result.n === 0) {
+        reject("修改失败");
+      } else {
+        let user = await ctx.service.user.getInfo(username);
+        resolve(user);
+      }
     });
   }
 

@@ -16,15 +16,9 @@ class UserController extends Controller {
   // 更新用户信息
   async update() {
     const {ctx} = this;
-    const info = ctx.request.body;
-    if (ctx.session.username !== info.username) {
-      this.error({
-        message: "无权限修改"
-      });
-      return;
-    }
-    await ctx.service.user.update().then(res => {
+    await ctx.service.user.update().then(data => {
       this.success({
+        data,
         message: "修改成功"
       });
     }).catch(err => {
