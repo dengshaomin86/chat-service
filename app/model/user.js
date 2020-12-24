@@ -3,7 +3,6 @@
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
-  console.log(defaultAvatar);
 
   const UserSchema = new Schema({
     username: {

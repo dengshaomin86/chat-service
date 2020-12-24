@@ -37,10 +37,9 @@ module.exports = app => {
   router.get('/chat/searchUser', userAuth, controller.chat.searchUser);
 
   // socket
-  io.of('/').route('chat', controller.chat.index);
-  io.of('/').route('message', controller.chat.message);
-  io.of('/').route('messageGroup', controller.chat.messageGroup);
-  io.of('/').route('user', controller.chat.online);
+  io.of('/').route('chat', controller.message.index);
+  io.of('/').route('message', controller.message.message);
+  io.of('/').route('messageGroup', controller.message.messageGroup);
 
   io.of('/news').route('news', controller.news.index);
 };
