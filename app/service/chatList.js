@@ -11,19 +11,26 @@ class ChatListService extends Service {
   async add() {
     const {ctx} = this;
     const params = ctx.query;
+    const {username} = params;
+
+    // 获取用户信息
+    const user = await ctx.model.User.findOne({username});
+    if (!user) return null;
+    const {userId, avatar} = user;
 
     let chatObj = null;
     if (params.type === "1") {
       // 单聊
       chatObj = {
-        chatId: createChatId(ctx.session.userId, params.userId),
+        chatId: createChatId(ctx.session.userId, userId),
         chatType: "1",
         msg: "",
         msgDate: "",
         msgType: "1",
-        toUsername: params.username,
-        toUserId: params.userId,
-        name: params.username
+        toUsername: username,
+        toUserId: userId,
+        avatar,
+        name: username
       };
     }
     return chatObj;

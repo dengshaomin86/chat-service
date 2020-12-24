@@ -1,30 +1,28 @@
 'use strict';
 
 const Controller = require('../core/baseController');
+const pick = require("lodash").pick;
 
 // 好友
 class FriendController extends Controller {
   // 联系人列表
-  async getContactList() {
+  async list() {
     const {ctx} = this;
-    let list = [];
+    const {username} = ctx.session;
 
     // 查找联系人列表
-    const contact = await ctx.model.Contact.find({
-      username: ctx.session.username
-    });
-    if (contact.length) list = contact[0].list;
+    const contact = await ctx.model.Contact.findOne({username});
+    const contactList = (contact && contact.list) || [];
+    const users = await ctx.model.User.find({username: {$in: contactList.map(item => item.username)}});
+    const list = users.map(item => pick(item, ["username", "userId", "avatar", "nickname"]));
 
     // 好友请求数量
-    const reqList = await ctx.model.ContactRequest.find({
-      username: ctx.session.username
-    });
-    let addReqNum = 0;
-    if (reqList.length) addReqNum = reqList[0].list.filter(item => item.status === "0").length;
+    const reqList = await ctx.model.ContactRequest.findOne({username});
+    const addReqNum = (reqList && reqList.list.filter(item => item.status === "0").length) || 0;
 
     this.success({
       addReqNum,
-      list
+      list,
     });
   }
 

@@ -4,8 +4,8 @@
  * @param {Egg.Application} app - egg application
  */
 module.exports = app => {
-  const { router, controller,  io } = app;
-  const gzip = app.middleware.gzip({ threshold: 1024 });
+  const {router, controller, io} = app;
+  const gzip = app.middleware.gzip({threshold: 1024});
   const userAuth = app.middleware.userauth({}, app);
 
   // home
@@ -24,6 +24,9 @@ module.exports = app => {
   router.get('/user/signOut', userAuth, controller.user.signOut);
   router.post('/user/getInfo', userAuth, controller.user.getInfo);
   router.post('/user/update', userAuth, controller.user.update);
+
+  // friend
+  router.get('/friend/list', userAuth, controller.friend.list);
 
   // chat
   router.get('/chat/addChatList', userAuth, controller.chat.addChatList);
