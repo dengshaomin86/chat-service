@@ -1,7 +1,8 @@
 'use strict';
 
-const Service = require('egg').Service;
-const pick = require("lodash").pick;
+const {Service} = require('egg');
+const {pick} = require("lodash");
+const {getFriendStatusText} = require('../core/statusText');
 
 // 创建用户 ID
 async function createID(ctx) {
@@ -32,63 +33,43 @@ class UserService extends Service {
     return await ctx.model.User.create(user);
   }
 
-  async getInfo(username) {
+  // 获取用户信息
+  async info(userId) {
     const {ctx} = this;
-    const params = ctx.request.body;
-    username = username || params.username;
+    const {session, params} = ctx;
 
-    if (!username) {
+    userId = userId || params.id;
+    let user = await ctx.model.User.findOne({userId});
+    if (!user) {
       return new Promise((resolve, reject) => {
         reject("用户不存在");
       });
     }
 
-    let list = await ctx.model.User.find({
-      username
-    });
+    let info = pick(user, ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
 
-    if (!list.length) {
-      return new Promise((resolve, reject) => {
-        reject("用户不存在");
-      });
+    // 获取好友状态
+    let friendStatus = "0";
+    if (userId !== session.userId) {
+      let friend = await ctx.model.Friend.findOne({userId: session.userId});
+      let requestList = (friend && friend.request) || [];
+      let requestObj = requestList.find(fri => fri.userId === userId);
+      if (requestObj) friendStatus = requestObj.friendStatus;
     }
-
-    let obj = pick(list[0], ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
-
-    let friendStatus = "0"; // 0 未添加；1 已添加；2 待同意
-    let friendStatusText = "未添加"; // 0 未添加；1 已添加；2 待同意
-
-    if (username !== ctx.session.username) {
-      // 查找是否已经是好友
-      let contact = await ctx.model.Contact.find({
-        username
-      });
-      if (contact.length && contact[0].list.find(fri => fri.username === ctx.session.username)) {
-        friendStatus = "1";
-        friendStatusText = "好友";
-      }
-
-      // 查找是否待回应
-      let contactRequest = await ctx.model.ContactRequest.find({
-        username
-      });
-      if (contactRequest.length && contactRequest[0].list.find(fri => fri.username === ctx.session.username && fri.status === "0")) {
-        friendStatus = "2";
-        friendStatusText = "待同意";
-      }
-    }
+    let friendStatusText = getFriendStatusText(friendStatus);
 
     return {
-      ...obj,
+      ...info,
       friendStatus,
       friendStatusText
     };
   }
 
+  // 修改用户信息
   async update() {
     const {ctx} = this;
     const info = ctx.request.body;
-    const {username} = ctx.session;
+    const {username, userId} = ctx.session;
 
     if (typeof info !== "object") {
       return new Promise((resolve, reject) => {
@@ -111,12 +92,13 @@ class UserService extends Service {
       if (result.n === 0) {
         reject("修改失败");
       } else {
-        let user = await ctx.service.user.getInfo(username);
+        let user = await ctx.service.user.info(userId);
         resolve(user);
       }
     });
   }
 
+  // 登录
   async signIn() {
     const {ctx} = this;
     const info = ctx.request.body;
@@ -141,10 +123,11 @@ class UserService extends Service {
     return new Promise((resolve, reject) => {
       ctx.session.username = user.username;
       ctx.session.userId = user.userId;
-      resolve(pick(user, ["username", "avatar", "nickname"]));
+      resolve(pick(user, ["username", "userId", "avatar", "nickname"]));
     });
   }
 
+  // 获取用户头像
   async getAvatar(userId) {
     const {ctx} = this;
     let user = await ctx.model.User.find({

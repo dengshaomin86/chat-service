@@ -1,4 +1,12 @@
 'use strict';
+/**
+ * RESTful API
+ * GET 用来获取资源（ctx.query）
+ * POST 用来新建资源（也可以用于更新资源）（ctx.request.body）
+ * DELETE 用来删除资源（ctx.params）
+ * PUT 方法主要是用来更新整个资源的
+ * PATCH 方法主要是用来执行某项操作并更新资源的某些字段
+ */
 
 /**
  * @param {Egg.Application} app - egg application
@@ -22,11 +30,16 @@ module.exports = app => {
   router.post('/user/signIn', controller.user.signIn);
   router.post('/user/signUp', controller.user.signUp);
   router.get('/user/signOut', userAuth, controller.user.signOut);
-  router.post('/user/getInfo', userAuth, controller.user.getInfo);
+  router.get('/user/info/:id', userAuth, controller.user.info);
   router.post('/user/update', userAuth, controller.user.update);
 
   // friend
   router.get('/friend/list', userAuth, controller.friend.list);
+  router.get('/friend/requestList', userAuth, controller.friend.requestList);
+  router.post('/friend/add', userAuth, controller.friend.add);
+  router.post('/friend/agree', userAuth, controller.friend.agree);
+  router.post('/friend/refuse', userAuth, controller.friend.refuse);
+  router.delete('/friend/remove/:id', userAuth, controller.friend.remove);
 
   // chat
   router.get('/chat/addChatList', userAuth, controller.chat.addChatList);

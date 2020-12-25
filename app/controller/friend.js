@@ -1,138 +1,101 @@
 'use strict';
 
 const Controller = require('../core/baseController');
-const pick = require("lodash").pick;
+const {getFriendStatusText} = require('../core/statusText');
 
 // 好友
 class FriendController extends Controller {
-  // 联系人列表
+  // 获取好友列表
   async list() {
     const {ctx} = this;
-    const {username} = ctx.session;
-
-    // 查找联系人列表
-    const contact = await ctx.model.Contact.findOne({username});
-    const contactList = (contact && contact.list) || [];
-    const users = await ctx.model.User.find({username: {$in: contactList.map(item => item.username)}});
-    const list = users.map(item => pick(item, ["username", "userId", "avatar", "nickname"]));
-
-    // 好友请求数量
-    const reqList = await ctx.model.ContactRequest.findOne({username});
-    const addReqNum = (reqList && reqList.list.filter(item => item.status === "0").length) || 0;
-
-    this.success({
-      addReqNum,
-      list,
-    });
-  }
-
-  // 添加联系人
-  async addContactFriend() {
-    const {ctx} = this;
-    await ctx.service.contactRequest.add().then(res => {
+    await ctx.service.friend.list().then(res => {
       this.success({
-        message: "成功发送好友请求，等待对方同意",
-        friendStatus: "2",
-        friendStatusText: "待同意",
+        ...res
       });
     }).catch(err => {
       this.error({
-        message: "添加失败",
         info: err
       });
     });
   }
 
-  // 好友请求列表
-  async getAddReqList() {
+  // 获取好友请求列表
+  async requestList() {
     const {ctx} = this;
-
-    const reqList = await ctx.model.ContactRequest.find({
-      username: ctx.session.username
+    await ctx.service.friend.requestList().then(res => {
+      this.success({
+        ...res
+      });
+    }).catch(err => {
+      this.error({
+        info: err
+      });
     });
+  }
 
-    let list = [];
-    if (reqList.length) list = reqList[0].list;
-    this.success({
-      list
+  // 添加好友
+  async add() {
+    const {ctx} = this;
+    await ctx.service.friend.add().then(res => {
+      this.success({
+        message: "成功发送好友请求，等待对方同意",
+        friendStatus: "2",
+        friendStatusText: getFriendStatusText("2"),
+      });
+    }).catch(err => {
+      this.error({
+        message: err || "添加失败",
+        info: err
+      });
     });
   }
 
   // 同意好友请求
-  async agreeAddFriendReq() {
+  async agree() {
     const {ctx} = this;
-    await ctx.service.contactRequest.agree().then(res => {
+    await ctx.service.friend.agree().then(res => {
       this.success({
-        message: "你们现在可以聊天了",
-        status: "1",
-        statusText: "已同意",
+        message: "你们成为了好友",
+        friendStatus: "1",
+        friendStatusText: getFriendStatusText("1"),
       });
     }).catch(err => {
       this.error({
-        message: "操作失败，请换个姿势再试",
+        message: "操作失败",
         info: err
       });
     });
   }
 
   // 拒绝好友请求
-  async refuseAddFriendReq() {
+  async refuse() {
     const {ctx} = this;
-    await ctx.service.contactRequest.refuse().then(res => {
+    await ctx.service.friend.refuse().then(res => {
       this.success({
-        message: "你成功拒绝了一次骚扰",
-        status: "2",
-        statusText: "已拒绝",
+        message: "你拒绝了他（她）",
+        friendStatus: "4",
+        friendStatusText: getFriendStatusText("4"),
       });
     }).catch(err => {
       this.error({
-        message: "操作失败，请换个姿势再试",
+        message: "操作失败",
         info: err
       });
     });
   }
 
-  // 搜索用户
-  async searchUser() {
+  // 删除好友
+  async remove() {
     const {ctx} = this;
-    const params = ctx.query;
-    let userList = await ctx.model.User.find({
-      usernameLowercase: params.keyword.toLowerCase()
-    });
-
-    let list = [];
-    for (let item of userList) {
-      let friendStatus = "0"; // 0 未添加；1 已添加；2 待同意
-      let friendStatusText = "未添加";
-
-      // 查找是否已经是好友
-      let contact = await ctx.model.Contact.find({
-        username: item.username
+    await ctx.service.friend.remove().then(r => {
+      this.success({
+        message: "删除成功"
       });
-      if (contact.length && contact[0].list.find(fri => fri.username === ctx.session.username)) {
-        friendStatus = "1";
-        friendStatusText = "已添加";
-      }
-
-      // 查找是否待回应
-      let contactRequest = await ctx.model.ContactRequest.find({
-        username: item.username
+    }).catch(err => {
+      this.success({
+        message: "删除失败",
+        err
       });
-      if (contactRequest.length && contactRequest[0].list.find(fri => fri.username === ctx.session.username && fri.friendStatus === "0")) {
-        friendStatus = "2";
-        friendStatusText = "待同意";
-      }
-
-      list.push({
-        username: item.username,
-        userId: item.userId,
-        friendStatus,
-        friendStatusText
-      });
-    }
-
-    this.success({
-      list
     });
   }
 }

@@ -116,9 +116,9 @@ class UserController extends Controller {
   }
 
   // 获取用户信息
-  async getInfo() {
+  async info() {
     const {ctx} = this;
-    await ctx.service.user.getInfo().then(res => {
+    await ctx.service.user.info().then(res => {
       this.success({
         data: res
       });
