@@ -15,7 +15,7 @@ const Controller = require('../core/baseController');
 const {roomNameDefault, avatarDefault} = require('../core/baseConfig');
 
 class MessageController extends Controller {
-  // 对话列表
+  // 聊天记录
   async list() {
     const {ctx} = this;
     await ctx.service.message.list().then(list => {

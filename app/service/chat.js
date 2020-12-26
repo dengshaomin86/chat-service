@@ -7,6 +7,73 @@ function createChatId(fromUserId, toUserId) {
 }
 
 class ChatService extends Service {
+  // 获取聊天列表
+  async list() {
+    const {ctx} = this;
+    const {session} = ctx;
+    const {userId, username} = session;
+
+    const chat = await ctx.model.Chat.findOne({userId});
+
+    if (chat) {
+      const chatList = (chat && chat.list) || [];
+      let list = chatList.map(async (item) => {
+        // 获取最后一条信息
+        let msgList = await ctx.model.Message.find({chatId: item});
+      });
+
+      for (let item of chatList) {
+        // 获取最后一条信息
+        let msgList = await ctx.model.Message.find({
+          chatId: item
+        });
+        let obj = JSON.parse(JSON.stringify(msgList[msgList.length - 1]));
+        obj.name = obj.fromUserId === ctx.session.userId ? obj.toUsername : obj.fromUsername;
+        let userId = obj.fromUserId === ctx.session.userId ? obj.toUserId : obj.fromUserId;
+
+        await ctx.service.user.getAvatar(userId).then(url => {
+          obj.avatar = url;
+        }).catch(err => {
+          obj.avatar = defaultAvatar;
+        });
+
+        list.push(obj);
+      }
+    }
+
+    let list = [];
+    if (userChatList.length && userChatList[0].list.length) {
+      let chatList = userChatList[0].list;
+
+    }
+
+    // 群聊数据
+    let defaultGroup = {
+      chatId: "group001",
+      chatType: "2", // 群聊
+      name: "默认群聊",
+      msg: "goodnight",
+      msgDate: new Date("2020/06/06 06:06:06").getTime(),
+      fromUsername: "管理员",
+      fromUserId: "001",
+      avatar: defaultAvatar
+    };
+    // 获取最后一条信息
+    let msgGroupList = await ctx.model.MessageGroup.find({
+      chatId: "group001"
+    });
+    if (msgGroupList.length) {
+      let msgGroupObj = JSON.parse(JSON.stringify(msgGroupList[msgGroupList.length - 1]));
+      defaultGroup.msg = msgGroupObj.msg;
+      defaultGroup.msgDate = msgGroupObj.msgDate;
+      defaultGroup.fromUsername = msgGroupObj.fromUsername;
+      defaultGroup.fromUserId = msgGroupObj.fromUserId;
+    }
+    list.push(defaultGroup);
+
+    return list;
+  }
+
   // 新增聊天列表
   async add() {
     const {ctx} = this;
@@ -79,61 +146,6 @@ class ChatService extends Service {
         list: [msgObj.chatId]
       });
     }
-  }
-
-  // 获取聊天列表
-  async list() {
-    const {ctx} = this;
-
-    const userChatList = await ctx.model.Chat.find({
-      userId: ctx.session.userId
-    });
-
-    let list = [];
-    if (userChatList.length && userChatList[0].list.length) {
-      let chatList = userChatList[0].list;
-      for (let item of chatList) {
-        // 获取最后一条信息
-        let msgList = await ctx.model.Message.find({
-          chatId: item
-        });
-        let obj = JSON.parse(JSON.stringify(msgList[msgList.length - 1]));
-        obj.name = obj.fromUserId === ctx.session.userId ? obj.toUsername : obj.fromUsername;
-        let userId = obj.fromUserId === ctx.session.userId ? obj.toUserId : obj.fromUserId;
-        await ctx.service.user.getAvatar(userId).then(url => {
-          obj.avatar = url;
-        }).catch(err => {
-          obj.avatar = defaultAvatar;
-        });
-        list.push(obj);
-      }
-    }
-
-    // 群聊数据
-    let defaultGroup = {
-      chatId: "group001",
-      chatType: "2", // 群聊
-      name: "默认群聊",
-      msg: "goodnight",
-      msgDate: new Date("2020/06/06 06:06:06").getTime(),
-      fromUsername: "管理员",
-      fromUserId: "001",
-      avatar: defaultAvatar
-    };
-    // 获取最后一条信息
-    let msgGroupList = await ctx.model.MessageGroup.find({
-      chatId: "group001"
-    });
-    if (msgGroupList.length) {
-      let msgGroupObj = JSON.parse(JSON.stringify(msgGroupList[msgGroupList.length - 1]));
-      defaultGroup.msg = msgGroupObj.msg;
-      defaultGroup.msgDate = msgGroupObj.msgDate;
-      defaultGroup.fromUsername = msgGroupObj.fromUsername;
-      defaultGroup.fromUserId = msgGroupObj.fromUserId;
-    }
-    list.push(defaultGroup);
-
-    return list;
   }
 }
 

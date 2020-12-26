@@ -7,19 +7,17 @@ class OnlineService extends Service {
   // 新增、更新在线用户
   async add() {
     const {ctx} = this;
-    const {username} = ctx.session;
+    const {username, userId} = ctx.session;
     if (!username) return false;
-    const users = await ctx.model.User.find({
-      usernameLowercase: (username).toLowerCase()
-    });
-    if (!users.length) {
+    const users = await ctx.model.User.findOne({userId});
+    if (!users) {
       return new Promise((resolve, reject) => {
         reject("用户不存在");
       });
     }
     let data = {
       username,
-      userId: users[0].userId,
+      userId: users.userId,
       socketId: ctx.socket.id
     };
     const onlineUsers = await ctx.model.Online.find({

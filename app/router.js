@@ -27,6 +27,7 @@ module.exports = app => {
   router.get('/view/test2', controller.view.test2);
 
   // user
+  router.get('/create/admin/:password', controller.user.createAdmin);
   router.post('/user/signIn', controller.user.signIn);
   router.post('/user/signUp', controller.user.signUp);
   router.get('/user/signOut', userAuth, controller.user.signOut);

@@ -2,55 +2,44 @@
 
 const {avatarDefault} = require('../core/baseConfig');
 
+// 聊天列表
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
 
-  const UserSchema = new Schema({
-    username: {
+  const GroupSchema = new Schema({
+    groupName: {
       type: String,
       unique: true,
       required: true,
       minlength: 2,
       maxlength: 10,
     },
-    usernameLowercase: {
-      type: String,
-      lowercase: true
-    },
-    userId: {
+    groupId: {
       type: String,
       required: true,
     },
-    password: {
+    // 群主
+    master: {
       type: String,
       required: true,
-      minlength: 2,
-      maxlength: 30,
     },
     avatar: {
       type: String,
       default: () => avatarDefault
     },
-    nickname: {
+    // 群公告
+    announcement: {
       type: String,
-      default: () => ""
+      default: ""
     },
-    // 性别：0保密；1男；2女
-    sex: {
-      type: String,
-      default: () => "0"
+    // 群组成员
+    members: {
+      type: Array,
+      default: () => []
     },
-    hobby: {
-      type: String,
-      default: () => ""
-    },
-    signature: {
-      type: String,
-      default: () => ""
-    },
-    // 用户所在群组
-    group: {
+    // 聊天记录
+    record: {
       type: Array,
       default: () => []
     },
@@ -59,5 +48,5 @@ module.exports = app => {
       default: () => new Date().getTime()
     }
   });
-  return mongoose.model('User', UserSchema);
+  return mongoose.model('Group', GroupSchema);
 };

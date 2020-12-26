@@ -3,7 +3,18 @@
 // 默认头像
 const avatarDefault = "/static/avatar/default.jpeg";
 
-// 公共房间名称
+// 管理员
+const admin = {
+  username: "admin",
+  userId: "000001",
+};
+
+// 公共群组
+const groupPublic = {
+  groupName: "默认群聊",
+  groupId: "g000001",
+};
+
 const roomNameDefault = "publicRoom";
 
 // 获取好友请求状态值对应文本
@@ -19,6 +30,8 @@ const getFriendStatusText = (friendStatus) => {
 
 module.exports = {
   avatarDefault,
+  admin,
+  groupPublic,
   roomNameDefault,
   getFriendStatusText,
 };

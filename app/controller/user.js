@@ -3,85 +3,32 @@
 const Controller = require('../core/baseController');
 
 class UserController extends Controller {
-  async index() {
+  // 创建管理员账户
+  async createAdmin() {
     const {ctx} = this;
-    ctx.body = 'user';
-  }
-
-  async delete() {
-    const {ctx} = this;
-    await ctx.model["user"].deleteOne({"_id": id});
-  }
-
-  // 更新用户信息
-  async update() {
-    const {ctx} = this;
-    await ctx.service.user.update().then(data => {
+    await ctx.service.user.createAdmin().then(user => {
       this.success({
-        data,
-        message: "修改成功"
+        message: "创建成功",
+        user
       });
-    }).catch(err => {
+    }).catch(message => {
       this.error({
-        message: "修改失败",
-        info: err
+        message
       });
     });
-  }
-
-  async find() {
-    const {ctx} = this;
-    console.log('query***', ctx.query);
-    console.log('params***', ctx.params);
-    console.log('request***', ctx.request);
-    let result = await ctx.model.User.find({
-      userName: ctx.params.username || ""
-    });
-    console.log('result***', result);
-    if (!result.length) {
-      ctx.body = "无匹配用户";
-      return;
-    }
-    if (result.length === 1) {
-      ctx.body = result[0];
-      return;
-    }
-    ctx.body = result;
-  }
-
-  // 查找所有用户信息
-  async findAll() {
-    const {ctx} = this;
-    ctx.body = await ctx.model.User.find();
   }
 
   // 注册
   async signUp() {
     const {ctx} = this;
-    const info = ctx.request.body;
-    const users = await ctx.model.User.find({
-      usernameLowercase: (info.username).toLowerCase()
-    });
-    if (users.length) {
-      this.error({
-        message: "用户已存在"
-      });
-      return;
-    }
-    if (info.password !== info.cfPassword) {
-      this.error({
-        message: "密码不一致，请重新输入"
-      });
-      return;
-    }
-    await ctx.service.user.add(info).then(res => {
+    await ctx.service.user.signUp().then(user => {
       this.success({
-        message: "注册成功"
+        message: "注册成功",
+        user
       });
-    }).catch(err => {
+    }).catch(message => {
       this.error({
-        message: err.message,
-        info: err
+        message
       });
     });
   }
@@ -127,6 +74,22 @@ class UserController extends Controller {
       this.error({
         info: err,
         message: "获取用户信息失败"
+      });
+    });
+  }
+
+  // 更新用户信息
+  async update() {
+    const {ctx} = this;
+    await ctx.service.user.update().then(data => {
+      this.success({
+        data,
+        message: "修改成功"
+      });
+    }).catch(err => {
+      this.error({
+        message: "修改失败",
+        info: err
       });
     });
   }
