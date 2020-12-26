@@ -152,7 +152,10 @@ class FriendService extends Service {
     // 推送消息
     let online = await ctx.model.Online.findOne({userId: toUserId});
     if (online && online.socketId) {
-      app.io.of('/').sockets[online.socketId].emit('friendRequest', msg);
+      app.io.of('/').sockets[online.socketId].emit("friendRelated", {
+        type: "request",
+        msg
+      });
     }
 
     return "success";
@@ -161,7 +164,7 @@ class FriendService extends Service {
   // 同意好友请求
   async agree() {
     const {ctx} = this;
-    const {session, request} = ctx;
+    const {session, request, app} = ctx;
     const {username, userId} = session;
     const {toUsername, toUserId} = request.body;
 
@@ -225,6 +228,15 @@ class FriendService extends Service {
     friendOther.list = listOther;
     friendOther.request = requestListOther;
     await ctx.model.Friend.updateOne({userId: toUserId}, friendOther);
+
+    // 推送消息
+    let online = await ctx.model.Online.findOne({userId: toUserId});
+    if (online && online.socketId) {
+      app.io.of('/').sockets[online.socketId].emit("friendRelated", {
+        type: "agree",
+        msg: "friend-agree"
+      });
+    }
 
     return "success";
   }
@@ -291,13 +303,13 @@ class FriendService extends Service {
   // 删除好友
   async remove() {
     const {ctx} = this;
-    const {params, session} = ctx;
-    const {id} = params;
+    const {params, session, app} = ctx;
     const {userId} = session;
+    const toUserId = params.id;
 
     function verify() {
-      if (!id) return "用户id有误";
-      if (userId === id) return "您不能删除自己";
+      if (!toUserId) return "用户id有误";
+      if (userId === toUserId) return "您不能删除自己";
       return false;
     }
 
@@ -330,10 +342,19 @@ class FriendService extends Service {
     }
 
     // 删除数据-本人
-    await delData(userId, id);
+    await delData(userId, toUserId);
 
     // 删除数据-对方
-    await delData(id, userId);
+    await delData(toUserId, userId);
+
+    // 推送消息
+    let online = await ctx.model.Online.findOne({userId: toUserId});
+    if (online && online.socketId) {
+      app.io.of('/').sockets[online.socketId].emit("friendRelated", {
+        type: "remove",
+        msg: "friend-remove"
+      });
+    }
 
     return "success";
   }

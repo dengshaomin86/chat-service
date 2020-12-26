@@ -45,17 +45,9 @@ module.exports = app => {
   router.get('/chat/addChatList', userAuth, controller.chat.addChatList);
   router.get('/chat/getChatList', userAuth, controller.chat.getChatList);
   router.get('/chat/getMsgList', userAuth, controller.chat.getMsgList);
-  router.get('/chat/getContactList', userAuth, controller.chat.getContactList);
-  router.get('/chat/addContactFriend', userAuth, controller.chat.addContactFriend);
-  router.get('/chat/getAddReqList', userAuth, controller.chat.getAddReqList);
-  router.get('/chat/agreeAddFriendReq', userAuth, controller.chat.agreeAddFriendReq);
-  router.get('/chat/refuseAddFriendReq', userAuth, controller.chat.refuseAddFriendReq);
-  router.get('/chat/searchUser', userAuth, controller.chat.searchUser);
 
   // socket
-  io.of('/').route('chat', controller.message.index);
   io.of('/').route('message', controller.message.message);
   io.of('/').route('messageGroup', controller.message.messageGroup);
-
   io.of('/news').route('news', controller.news.index);
 };
