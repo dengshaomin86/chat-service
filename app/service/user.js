@@ -2,7 +2,7 @@
 
 const {Service} = require('egg');
 const {pick} = require("lodash");
-const {getFriendStatusText} = require('../core/statusText');
+const {getFriendStatusText} = require('../core/baseConfig');
 
 // 创建用户 ID
 async function createID(ctx) {
@@ -127,22 +127,19 @@ class UserService extends Service {
     });
   }
 
-  // 获取用户头像
-  async getAvatar(userId) {
+  // 退出登录
+  async signOut() {
     const {ctx} = this;
-    let user = await ctx.model.User.find({
-      userId
-    });
+    await ctx.service.online.remove();
+    ctx.session = {};
+    return "success";
+  }
 
-    if (!user.length) {
-      return new Promise((resolve, reject) => {
-        reject("用户不存在");
-      });
-    }
-
-    return new Promise((resolve, reject) => {
-      resolve(user[0].avatar);
-    });
+  // 获取用户头像
+  async avatar(userId) {
+    const {ctx} = this;
+    const user = await ctx.model.User.findOne({userId});
+    return user.avatar;
   }
 }
 

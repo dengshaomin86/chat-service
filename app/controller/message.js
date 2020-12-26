@@ -1,43 +1,33 @@
 'use strict';
+/**
+ * socket.io
+ * - nsp:Namespace 命名空间
+ * - nsp.sockets[socketId].emit():给某个用户推送消息
+ * - nsp.to(room).emit():给某个房间推送消息
+ * - nsp.emit():给所有人推送消息
+ * - socket.id:发送消息人的socketID
+ * - socket.handshake:握手 https://www.wenjiangs.com/doc/6ealfln7
+ * - socket.disconnect():断开连接
+ * - ctx.args[0]:消息内容
+ */
 
 const Controller = require('../core/baseController');
-const room = "default_room";
+const {roomNameDefault, avatarDefault} = require('../core/baseConfig');
 
 class MessageController extends Controller {
-
-  // ****************************  socket  ****************************
-
-  async test() {
+  // 对话列表
+  async list() {
     const {ctx} = this;
-    const {socket, app} = ctx;
-    const params = ctx.args[0];
-    const nsp = app.io.of('/');
-    console.log("params***", params);
-    // console.log("nsp***", nsp);
-    console.log("socket***1", socket.conn.id);
-    // console.log("params.user***", params.user);
-    // console.log("socket.id***", socket.id);
-    // console.log("socket.handshake.query***", socket.handshake.query);
-    // ctx.socket.emit('res', `to ${params.user} res`);
-    ctx.socket.to("default_room").emit('res', params.user + '加入了房间');
-  }
-
-  async index() {
-    const {app, socket, logger, helper} = this.ctx;
-    const nsp = app.io.of('/');
-    const id = socket.id;
-    // 根据id给指定连接发送消息
-    nsp.sockets[id].emit('res', `receive ${this.ctx.args[0].user} msg: ${this.ctx.args[0].msg}`);
-    // 指定房间连接信息列表
-    nsp.adapter.clients([room], (err, clients) => {
-      console.log(JSON.stringify(clients));
+    await ctx.service.message.list().then(list => {
+      this.success({
+        list
+      });
+    }).catch(err => {
+      this.error({
+        message: "获取聊天记录失败",
+        info: err
+      });
     });
-    // 给指定房间的每个人发送消息
-    nsp.to(room).emit('res', this.ctx.socket.id + "上线了");
-    // 发给所有人
-    // nsp.emit('res', "emit msg");
-    // 断开连接
-    // this.ctx.socket.disconnect();
   }
 
   // 单人对话
@@ -96,33 +86,37 @@ class MessageController extends Controller {
   // 群组聊天
   async messageGroup() {
     const {ctx} = this;
-    const {app, socket, logger, helper} = ctx;
+    const {app, session, socket, logger, helper} = ctx;
+    const {username, userId} = session;
     const nsp = app.io.of('/');
+    const data = ctx.args[0];
+
+    // 获取房间里已连接用户的socketID
+    // nsp.adapter.clients([roomNameDefault], (err, clients) => {
+    //   console.log(JSON.stringify(clients));
+    // });
 
     // 拼装完整消息体
-    let msgObj = ctx.args[0];
-    msgObj.fromUsername = ctx.session.username;
-    msgObj.fromUserId = ctx.session.userId;
-    await ctx.service.user.getAvatar(msgObj.fromUserId).then(url => {
-      msgObj.fromUserAvatar = url;
-    }).catch(err => {
-      msgObj.fromUserAvatar = defaultAvatar;
-    });
-    msgObj.avatar = defaultAvatar;
+    const fromUserAvatar = await ctx.service.user.avatar(userId);
+    const msgObj = {
+      ...data,
+      fromUsername: username,
+      fromUserId: userId,
+      fromUserAvatar,
+      avatar: avatarDefault,
+    };
 
     // 给指定房间的每个人发送消息
-    nsp.to(room).emit('messageResponse', msgObj);
+    nsp.to(roomNameDefault).emit('messageResponse', msgObj);
 
     // 储存聊天记录
-    await ctx.service.messageGroup.add(msgObj).then(res => {
-      console.log("储存成功");
-    }).catch(err => {
-      console.log("储存失败", err);
-    });
+    await ctx.service.messageGroup.add(msgObj);
   }
 
-  // 退出
-  async signOut() {
+  /*-------------------------------------- test --------------------------------*/
+
+  // 退出房间
+  async testLeave() {
     const {ctx} = this;
     const {app, socket, logger, helper} = ctx;
     const nsp = app.io.of('/');
@@ -132,7 +126,7 @@ class MessageController extends Controller {
       // 踢出用户前发送消息
       nsp.sockets[id].emit('res', msg);
       // 退出房间
-      ctx.socket.leave(room);
+      ctx.socket.leave(roomNameDefault);
 
       // 调用 adapter 方法踢出用户，客户端触发 disconnect 事件
       // nsp.adapter.remoteDisconnect(id, true, err => {

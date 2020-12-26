@@ -68,8 +68,8 @@ module.exports = appInfo => {
     init: {},
     namespace: {
       '/': {
-        connectionMiddleware: ["auth"], // 这里我们可以做一些权限校验之类的操作
-        packetMiddleware: ["filter"], // 通常用于对消息做预处理，又或者是对加密消息的解密等操作
+        connectionMiddleware: ["connection"],
+        packetMiddleware: ["packet"],
       },
       '/news': {
         connectionMiddleware: [],

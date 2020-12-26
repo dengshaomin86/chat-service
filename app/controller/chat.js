@@ -3,26 +3,10 @@
 const Controller = require('../core/baseController');
 
 class ChatController extends Controller {
-  // 新增聊天列表
-  async addChatList() {
-    const {ctx} = this;
-    await ctx.service.chatList.add().then(res => {
-      this.success({
-        message: "创建成功",
-        data: res
-      });
-    }).catch(err => {
-      this.error({
-        message: "创建失败",
-        info: err
-      });
-    });
-  }
-
   // 聊天列表
-  async getChatList() {
+  async list() {
     const {ctx} = this;
-    await ctx.service.chatList.getChatList().then(list => {
+    await ctx.service.chat.list().then(list => {
       this.success({
         list
       });
@@ -34,16 +18,17 @@ class ChatController extends Controller {
     });
   }
 
-  // 对话列表
-  async getMsgList() {
+  // 新增聊天列表
+  async add() {
     const {ctx} = this;
-    await ctx.service.message.getMsgList().then(list => {
+    await ctx.service.chat.add().then(res => {
       this.success({
-        list
+        message: "创建成功",
+        data: res
       });
     }).catch(err => {
       this.error({
-        message: "获取聊天记录失败",
+        message: "创建失败",
         info: err
       });
     });

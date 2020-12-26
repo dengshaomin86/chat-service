@@ -2,7 +2,7 @@
 
 const {Service} = require('egg');
 const {pick} = require("lodash");
-const {getFriendStatusText} = require('../core/statusText');
+const {getFriendStatusText} = require('../core/baseConfig');
 
 class FriendService extends Service {
   // 获取好友列表
@@ -33,11 +33,12 @@ class FriendService extends Service {
 
     const friend = await ctx.model.Friend.findOne({userId});
     const requestList = (friend && friend.request) || [];
+    const list = requestList.filter(item => item.friendStatus !== "0");
     const requestNum = requestList.filter(item => item.friendStatus === "3").length;
 
     return {
       requestNum,
-      list: requestList,
+      list,
     };
   }
 
@@ -341,13 +342,13 @@ class FriendService extends Service {
       await ctx.model.Friend.updateOne({userId}, friend);
     }
 
-    // 删除数据-本人
+    // 删除好友数据-本人
     await delData(userId, toUserId);
 
-    // 删除数据-对方
+    // 删除好友数据-对方
     await delData(toUserId, userId);
 
-    // 推送消息
+    // 推送消息刷新好友列表
     let online = await ctx.model.Online.findOne({userId: toUserId});
     if (online && online.socketId) {
       app.io.of('/').sockets[online.socketId].emit("friendRelated", {
@@ -355,6 +356,8 @@ class FriendService extends Service {
         msg: "friend-remove"
       });
     }
+
+    // 删除消息列表
 
     return "success";
   }

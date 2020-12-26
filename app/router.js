@@ -42,9 +42,11 @@ module.exports = app => {
   router.delete('/friend/remove/:id', userAuth, controller.friend.remove);
 
   // chat
-  router.get('/chat/addChatList', userAuth, controller.chat.addChatList);
-  router.get('/chat/getChatList', userAuth, controller.chat.getChatList);
-  router.get('/chat/getMsgList', userAuth, controller.chat.getMsgList);
+  router.get('/chat/list', userAuth, controller.chat.list);
+  router.get('/chat/add', userAuth, controller.chat.add);
+
+  // message
+  router.get('/message/list', userAuth, controller.message.list);
 
   // socket
   io.of('/').route('message', controller.message.message);

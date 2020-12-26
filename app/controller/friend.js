@@ -1,7 +1,7 @@
 'use strict';
 
 const Controller = require('../core/baseController');
-const {getFriendStatusText} = require('../core/statusText');
+const {getFriendStatusText} = require('../core/baseConfig');
 
 // 好友
 class FriendController extends Controller {

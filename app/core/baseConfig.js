@@ -1,3 +1,11 @@
+// 一些基本配置项
+
+// 默认头像
+const avatarDefault = "/static/avatar/default.jpeg";
+
+// 公共房间名称
+const roomNameDefault = "publicRoom";
+
 // 获取好友请求状态值对应文本
 const getFriendStatusText = (friendStatus) => {
   let map = new Map();
@@ -10,5 +18,7 @@ const getFriendStatusText = (friendStatus) => {
 };
 
 module.exports = {
-  getFriendStatusText
+  avatarDefault,
+  roomNameDefault,
+  getFriendStatusText,
 };

@@ -1,5 +1,7 @@
 'use strict';
 
+const {avatarDefault} = require('../core/baseConfig');
+
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
@@ -28,7 +30,7 @@ module.exports = app => {
     },
     avatar: {
       type: String,
-      default: () => defaultAvatar
+      default: () => avatarDefault
     },
     nickname: {
       type: String,

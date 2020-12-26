@@ -104,14 +104,15 @@ class UserController extends Controller {
   // 退出登录
   async signOut() {
     const {ctx} = this;
-    await ctx.service.online.remove().then(res => {
-      console.log("退出在线列表成功", res);
-      ctx.session.username = null;
+    await ctx.service.user.signOut().then(res => {
       this.success({
         message: "退出成功"
       });
     }).catch(err => {
-      console.log("退出在线列表失败", err);
+      this.error({
+        message: "操作失败",
+        err,
+      });
     });
   }
 

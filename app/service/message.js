@@ -3,14 +3,8 @@
 const Service = require('egg').Service;
 
 class MessageService extends Service {
-  // 新增对话
-  async add(msgObj) {
-    const {ctx} = this;
-    return await ctx.model.Message.create(msgObj);
-  }
-
   // 获取聊天记录
-  async getMsgList() {
+  async list() {
     const {ctx} = this;
     const params = ctx.query;
     let list = [];
@@ -61,6 +55,12 @@ class MessageService extends Service {
     }
 
     return _list;
+  }
+
+  // 新增对话
+  async add(msgObj) {
+    const {ctx} = this;
+    return await ctx.model.Message.create(msgObj);
   }
 }
 
