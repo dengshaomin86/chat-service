@@ -8,70 +8,49 @@ function createChatId(fromUserId, toUserId) {
 
 class ChatService extends Service {
   // 获取聊天列表
-  async list() {
-    const {ctx} = this;
-    const {session} = ctx;
-    const {userId, username} = session;
+  list() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session} = ctx;
+      const {userId, username} = session;
 
-    const chat = await ctx.model.Chat.findOne({userId});
+      const chat = await ctx.model.Chat.findOne({userId});
 
-    if (chat) {
-      const chatList = (chat && chat.list) || [];
-      let list = chatList.map(async (item) => {
-        // 获取最后一条信息
-        let msgList = await ctx.model.Message.find({chatId: item});
-      });
-
-      for (let item of chatList) {
-        // 获取最后一条信息
-        let msgList = await ctx.model.Message.find({
-          chatId: item
-        });
-        let obj = JSON.parse(JSON.stringify(msgList[msgList.length - 1]));
-        obj.name = obj.fromUserId === ctx.session.userId ? obj.toUsername : obj.fromUsername;
-        let userId = obj.fromUserId === ctx.session.userId ? obj.toUserId : obj.fromUserId;
-
-        await ctx.service.user.getAvatar(userId).then(url => {
-          obj.avatar = url;
-        }).catch(err => {
-          obj.avatar = defaultAvatar;
-        });
-
-        list.push(obj);
+      if (!chat) {
+        resolve([]);
+        return;
       }
-    }
 
-    let list = [];
-    if (userChatList.length && userChatList[0].list.length) {
-      let chatList = userChatList[0].list;
+      let chatList = chat.list || [];
 
-    }
+      // 遍历获取每个会话的最后一条消息
+      let list = [];
+      for (let idx in chatList) {
+        let item = chatList[idx];
+        switch (item.chatType) {
+          case "1":
+            let msgList = await ctx.model.Message.find({chatId: item.chatId});
+            break;
+          case "2":
+            const group = await ctx.model.Group.findOne({groupId: item.chatId});
+            if (!group) return;
+            const {record, groupId, groupName, avatar} = group;
+            if (!record || !record.length) return;
+            list.push({
+              ...record[record.length - 1],
+              chatType: "2",
+              chatId: groupId,
+              name: groupName,
+              avatar,
+              groupId,
+              groupName,
+            });
+            break;
+        }
+      }
 
-    // 群聊数据
-    let defaultGroup = {
-      chatId: "group001",
-      chatType: "2", // 群聊
-      name: "默认群聊",
-      msg: "goodnight",
-      msgDate: new Date("2020/06/06 06:06:06").getTime(),
-      fromUsername: "管理员",
-      fromUserId: "001",
-      avatar: defaultAvatar
-    };
-    // 获取最后一条信息
-    let msgGroupList = await ctx.model.MessageGroup.find({
-      chatId: "group001"
+      resolve(list);
     });
-    if (msgGroupList.length) {
-      let msgGroupObj = JSON.parse(JSON.stringify(msgGroupList[msgGroupList.length - 1]));
-      defaultGroup.msg = msgGroupObj.msg;
-      defaultGroup.msgDate = msgGroupObj.msgDate;
-      defaultGroup.fromUsername = msgGroupObj.fromUsername;
-      defaultGroup.fromUserId = msgGroupObj.fromUserId;
-    }
-    list.push(defaultGroup);
-
-    return list;
   }
 
   // 新增聊天列表
@@ -102,6 +81,42 @@ class ChatService extends Service {
     }
     return chatObj;
   }
+
+  // 加入会话列表
+  appendChat({chatId, chatType, username, userId}) {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+
+      let chat = await ctx.model.Chat.findOne({userId});
+      if (!chat) {
+        await ctx.model.Chat.create({
+          userId,
+          username,
+          list: [
+            {
+              chatId,
+              chatType,
+            }
+          ]
+        });
+        resolve("success");
+        return;
+      }
+
+      let {list} = chat;
+      if (list.find(item => item.chatId === chatId)) {
+        reject("已存在");
+        return;
+      }
+
+      list.push({chatId, chatType});
+      chat.list = list;
+      await ctx.model.Chat.updateOne({userId}, chat);
+
+      resolve("success");
+    });
+  }
+
 
   // 更新聊天列表
   async updateChatList(msgObj) {

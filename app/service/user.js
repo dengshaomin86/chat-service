@@ -51,6 +51,14 @@ class UserService extends Service {
       const group = [groupPublic.groupId];
       await ctx.model.User.create({username, password, userId, group});
 
+      // 加入会话列表
+      await ctx.service.chat.appendChat({
+        username,
+        userId,
+        chatId: groupPublic.groupId,
+        chatType: "2"
+      });
+
       resolve("success");
     });
   }
@@ -92,6 +100,14 @@ class UserService extends Service {
         groupId: groupPublic.groupId,
         username,
         userId,
+      });
+
+      // 加入会话列表
+      await ctx.service.chat.appendChat({
+        username,
+        userId,
+        chatId: groupPublic.groupId,
+        chatType: "2"
       });
 
       resolve(UserService.filterUserInfo(result));

@@ -14,7 +14,7 @@
 const Controller = require('../core/baseController');
 const {roomNameDefault, avatarDefault} = require('../core/baseConfig');
 
-class MessageController extends Controller {
+class SingleController extends Controller {
   // 聊天记录
   async list() {
     const {ctx} = this;
@@ -87,62 +87,30 @@ class MessageController extends Controller {
   async messageGroup() {
     const {ctx} = this;
     const {app, session, socket, logger, helper} = ctx;
-    const {id} = socket;
     const {username, userId} = session;
     const nsp = app.io.of('/');
     const data = ctx.args[0];
-    const {chatId, chatType, msg, createTime, msgType} = data;
 
     // 获取房间里已连接用户的socketID
     // nsp.adapter.clients([roomNameDefault], (err, clients) => {
     //   console.log(JSON.stringify(clients));
     // });
 
-    if (!msg) {
-      nsp.sockets[id].emit('tips', {
-        type: "warning",
-        text: "消息不能为空"
-      });
-      return;
-    }
-
-    // 储存的消息体
-    const storeObj = {
-      createTime,
-      msgType,
-      msg,
+    // 拼装完整消息体
+    const fromUserAvatar = await ctx.service.user.avatar(userId);
+    const msgObj = {
+      ...data,
       fromUsername: username,
       fromUserId: userId,
-    };
-
-    // 储存消息记录
-    let group = await ctx.model.Group.findOne({groupId: chatId});
-    if (!group) {
-      nsp.sockets[id].emit('tips', {
-        type: "warning",
-        text: "群组不存在"
-      });
-      return;
-    }
-    group.record.push(storeObj);
-    await ctx.model.Group.updateOne({groupId: chatId}, group);
-
-    // 推送的消息体
-    const fromUserAvatar = await ctx.service.user.avatar(userId);
-    const {groupName, avatar, groupId} = group;
-    const pushObj = {
-      ...storeObj,
       fromUserAvatar,
-      chatType,
-      chatId,
-      name: groupName,
-      avatar,
-      groupId,
-      groupName,
+      avatar: avatarDefault,
     };
 
     // 给指定房间的每个人发送消息
-    nsp.to(groupId).emit('messageResponse', pushObj);
+    nsp.to(roomNameDefault).emit('messageResponse', msgObj);
+
+    // 储存聊天记录
+    await ctx.service.messageGroup.add(msgObj);
   }
 
   /*-------------------------------------- test --------------------------------*/
@@ -178,4 +146,4 @@ class MessageController extends Controller {
   }
 }
 
-module.exports = MessageController;
+module.exports = SingleController;

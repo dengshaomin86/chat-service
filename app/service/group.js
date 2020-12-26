@@ -17,6 +17,15 @@ class GroupService extends Service {
       ...groupPublic,
       master: userId,
       members: [{username, userId}],
+      record: [
+        {
+          msgType: "1",
+          msg: groupPublic.msg,
+          fromUsername: username,
+          fromUserId: userId,
+          createTime: new Date().getTime(),
+        }
+      ],
     });
   }
 
@@ -47,6 +56,36 @@ class GroupService extends Service {
       await ctx.model.Group.updateOne({groupId}, group);
 
       resolve("success");
+    });
+  }
+
+  // 消息记录
+  async record() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, params} = ctx;
+      const {groupId} = params;
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) resolve([]);
+      const {record, groupName, avatar} = group;
+      // 处理消息内容
+      let list = [];
+      for (let idx  in record) {
+        let item = record[idx];
+        let {fromUserId} = item;
+        let fromUserAvatar = await ctx.service.user.avatar(fromUserId);
+        list.push({
+          ...item,
+          fromUserAvatar,
+          chatType: "2",
+          chatId: groupId,
+          name: groupName,
+          avatar,
+          groupId,
+          groupName,
+        });
+      }
+      resolve(list);
     });
   }
 }

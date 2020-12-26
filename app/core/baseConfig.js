@@ -13,6 +13,7 @@ const admin = {
 const groupPublic = {
   groupName: "默认群聊",
   groupId: "g000001",
+  msg: "Hello everyone",
 };
 
 const roomNameDefault = "publicRoom";

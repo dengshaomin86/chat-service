@@ -45,6 +45,7 @@ module.exports = app => {
   // chat
   router.get('/chat/list', userAuth, controller.chat.list);
   router.get('/chat/add', userAuth, controller.chat.add);
+  router.get('/group/record/:groupId', userAuth, controller.group.record);
 
   // message
   router.get('/message/list', userAuth, controller.message.list);

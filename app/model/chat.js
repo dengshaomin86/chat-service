@@ -17,7 +17,7 @@ module.exports = app => {
       type: String,
       required: true,
     },
-    // 即 chatId 的集合
+    // 即 {chatId:单聊、群聊的ID,chatType:类型(1单聊,2群聊)} 的集合
     list: {
       type: Array,
       default: () => []

@@ -13,6 +13,20 @@ class GroupController extends Controller {
   async create() {
     const {ctx} = this;
   }
+
+  // 消息记录
+  async record() {
+    const {ctx} = this;
+    await ctx.service.group.record().then(list => {
+      this.success({
+        list
+      });
+    }).catch(err => {
+      this.error({
+        err
+      })
+    });
+  }
 }
 
 module.exports = GroupController;
