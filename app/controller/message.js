@@ -108,6 +108,7 @@ class MessageController extends Controller {
 
     // 储存的消息体
     const storeObj = {
+      groupId: chatId,
       createTime,
       msgType,
       msg,
@@ -124,8 +125,7 @@ class MessageController extends Controller {
       });
       return;
     }
-    group.record.push(storeObj);
-    await ctx.model.Group.updateOne({groupId: chatId}, group);
+    await ctx.model.RecordGroup.create(storeObj);
 
     // 推送的消息体
     const fromUserAvatar = await ctx.service.user.avatar(userId);

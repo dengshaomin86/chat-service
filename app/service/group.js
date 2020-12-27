@@ -1,8 +1,9 @@
 'use strict';
 
-const Service = require('egg').Service;
+const {Service} = require('egg');
+const {pick} = require('lodash');
 
-const {groupPublic} = require("../core/baseConfig");
+const {groupPublic, recordGroupKey} = require("../core/baseConfig");
 
 class GroupService extends Service {
   // 创建群组ID
@@ -13,20 +14,25 @@ class GroupService extends Service {
   // 创建公共群聊
   async createPublic({username, userId}) {
     const {ctx} = this;
-    return await ctx.model.Group.create({
+
+    // 创建群组
+    await ctx.model.Group.create({
       ...groupPublic,
       master: userId,
       members: [{username, userId}],
-      record: [
-        {
-          msgType: "1",
-          msg: groupPublic.msg,
-          fromUsername: username,
-          fromUserId: userId,
-          createTime: new Date().getTime(),
-        }
-      ],
     });
+
+    // 增加一条默认消息内容
+    await ctx.model.RecordGroup.create({
+      groupId: groupPublic.groupId,
+      msgType: "1",
+      msg: groupPublic.msg,
+      fromUsername: username,
+      fromUserId: userId,
+      createTime: new Date().getTime(),
+    });
+
+    return "success";
   }
 
   // 创建群聊
@@ -67,7 +73,12 @@ class GroupService extends Service {
       const {groupId} = params;
       const group = await ctx.model.Group.findOne({groupId});
       if (!group) resolve([]);
-      const {record, groupName, avatar} = group;
+      const {groupName, avatar} = group;
+      const record = await ctx.model.RecordGroup.find({groupId});
+      if (!record || !record.length) {
+        resolve([]);
+        return;
+      }
       // 处理消息内容
       let list = [];
       for (let idx  in record) {
@@ -75,7 +86,7 @@ class GroupService extends Service {
         let {fromUserId} = item;
         let fromUserAvatar = await ctx.service.user.avatar(fromUserId);
         list.push({
-          ...item,
+          ...pick(item, recordGroupKey),
           fromUserAvatar,
           chatType: "2",
           chatId: groupId,

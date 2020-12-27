@@ -1,6 +1,8 @@
 'use strict';
 
-const Service = require('egg').Service;
+const {Service} = require('egg');
+const {pick} = require('lodash');
+const {recordGroupKey} = require('../core/baseConfig');
 
 function createChatId(fromUserId, toUserId) {
   return `${Math.min(fromUserId, toUserId)}&${Math.max(fromUserId, toUserId)}`;
@@ -34,10 +36,11 @@ class ChatService extends Service {
           case "2":
             const group = await ctx.model.Group.findOne({groupId: item.chatId});
             if (!group) return;
-            const {record, groupId, groupName, avatar} = group;
+            const {groupId, groupName, avatar} = group;
+            const record = await ctx.model.RecordGroup.find({groupId});
             if (!record || !record.length) return;
             list.push({
-              ...record[record.length - 1],
+              ...pick(record[record.length - 1], recordGroupKey),
               chatType: "2",
               chatId: groupId,
               name: groupName,
@@ -116,7 +119,6 @@ class ChatService extends Service {
       resolve("success");
     });
   }
-
 
   // 更新聊天列表
   async updateChatList(msgObj) {

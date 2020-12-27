@@ -16,6 +16,9 @@ const groupPublic = {
   msg: "Hello everyone",
 };
 
+// 群组储存字段
+const recordGroupKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
+
 const roomNameDefault = "publicRoom";
 
 // 获取好友请求状态值对应文本
@@ -33,6 +36,7 @@ module.exports = {
   avatarDefault,
   admin,
   groupPublic,
+  recordGroupKey,
   roomNameDefault,
   getFriendStatusText,
 };

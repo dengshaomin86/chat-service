@@ -38,18 +38,6 @@ module.exports = app => {
       type: Array,
       default: () => []
     },
-    /**
-     * 聊天记录
-     * - msgType:消息类型('1'文本)
-     * - msg:消息内容
-     * - fromUsername:发送人用户名
-     * - fromUserId:发送人用户ID
-     * - createTime:发送时间
-     */
-    record: {
-      type: Array,
-      default: () => []
-    },
     createDate: {
       type: String,
       default: () => new Date().getTime()
