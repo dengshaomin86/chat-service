@@ -21,7 +21,7 @@ class ChatService extends Service {
         switch (item.chatType) {
           case "1":
             const recordSingle = await ctx.model.RecordSingle.find({singleId: item.chatId});
-            if (!recordSingle || !recordSingle.length) return;
+            if (!recordSingle || !recordSingle.length) continue;
             const targetUserId = item.chatId.replace(userId, "");
             const targetUser = await ctx.model.User.findOne({userId: targetUserId});
             if (!targetUser) continue;

@@ -16,26 +16,34 @@ class SingleService extends Service {
       const {ctx} = this;
       const {session} = ctx;
       const {userId, username} = session;
-      const toUsername = ctx.query.username;
-      const toUserId = ctx.query.userId;
+      const withUserId = ctx.query.userId;
 
       // 获取用户信息
-      const user = await ctx.model.User.findOne({userId: toUserId});
+      const user = await ctx.model.User.findOne({userId: withUserId});
       if (!user) {
         reject("用户不存在");
         return;
       }
 
-      resolve({
-        chatId: await SingleService.createSingleId(userId, toUserId),
+      const chatId = await SingleService.createSingleId(userId, withUserId);
+
+      // 插入会话列表
+      await ctx.service.chat.updateChat({
+        chatId,
         chatType: "1",
-        chatName: toUsername,
+        username,
+        userId
+      });
+
+      resolve({
+        chatId,
+        chatType: "1",
+        chatName: user.username,
         chatAvatar: user.avatar,
-        msg: "",
-        msgType: "1",
-        toUsername,
-        toUserId,
-        createTime: "",
+        withUsername: user.username,
+        withUserId,
+        createTime: new Date(),
+        editTime: new Date(),
       });
     });
   }
