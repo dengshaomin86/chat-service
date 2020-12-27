@@ -78,6 +78,21 @@ class UserController extends Controller {
     });
   }
 
+  // 搜索用户
+  async search() {
+    const {ctx} = this;
+    await ctx.service.user.search().then(list => {
+      this.success({
+        list
+      });
+    }).catch(err => {
+      this.error({
+        info: err,
+        message: err
+      });
+    });
+  }
+
   // 更新用户信息
   async update() {
     const {ctx} = this;

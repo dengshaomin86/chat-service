@@ -32,6 +32,7 @@ module.exports = app => {
   router.post('/user/signUp', controller.user.signUp);
   router.get('/user/signOut', userAuth, controller.user.signOut);
   router.get('/user/info/:id', userAuth, controller.user.info);
+  router.get('/user/search', userAuth, controller.user.search);
   router.post('/user/update', userAuth, controller.user.update);
 
   // friend

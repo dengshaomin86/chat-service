@@ -38,7 +38,7 @@ class FriendController extends Controller {
     const {ctx} = this;
     await ctx.service.friend.add().then(res => {
       this.success({
-        message: "成功发送好友请求，等待对方同意",
+        message: "成功发送好友请求，等待对方确认",
         friendStatus: "2",
         friendStatusText: getFriendStatusText("2"),
       });

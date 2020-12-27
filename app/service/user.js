@@ -188,6 +188,45 @@ class UserService extends Service {
     });
   }
 
+  // 搜索用户
+  search() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, query} = ctx;
+      const {userId} = session;
+      const username = query.keyword;
+
+      if (!username) {
+        reject("请输入关键字");
+        return;
+      }
+
+      let user = await this.findUserByName(username);
+      if (!user) {
+        resolve([]);
+        return;
+      }
+
+      let info = pick(user, ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
+
+      // 获取好友状态
+      let friendStatus = "0";
+      if (userId !== info.userId) {
+        let friend = await ctx.model.Friend.findOne({userId});
+        let requestList = (friend && friend.request) || [];
+        let requestObj = requestList.find(fri => fri.userId === info.userId);
+        if (requestObj) friendStatus = requestObj.friendStatus;
+      }
+      let friendStatusText = getFriendStatusText(friendStatus);
+
+      resolve([{
+        ...info,
+        friendStatus,
+        friendStatusText
+      }]);
+    });
+  }
+
   // 修改用户信息
   update() {
     return new Promise(async (resolve, reject) => {

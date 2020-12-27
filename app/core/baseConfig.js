@@ -13,7 +13,7 @@ const admin = {
 const groupPublic = {
   groupName: "默认群聊",
   groupId: "g000001",
-  msg: "Hello everyone",
+  msg: "Hello",
 };
 
 // 群组储存字段
