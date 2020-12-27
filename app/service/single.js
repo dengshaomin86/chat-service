@@ -70,7 +70,7 @@ class SingleService extends Service {
         list.push({
           ...pick(item, storeMsgKey),
           fromUserAvatar,
-          chatType: "2",
+          chatType: "1",
           chatId: singleId,
           chatName: withUser.username,
           chatAvatar: withUser.avatar,
