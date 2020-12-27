@@ -3,7 +3,7 @@
 const {Service} = require('egg');
 const {pick} = require('lodash');
 
-const {groupPublic, recordGroupKey} = require("../core/baseConfig");
+const {groupPublic, storeMsgKey} = require("../core/baseConfig");
 
 class GroupService extends Service {
   // 创建群组ID
@@ -72,7 +72,10 @@ class GroupService extends Service {
       const {session, params} = ctx;
       const {groupId} = params;
       const group = await ctx.model.Group.findOne({groupId});
-      if (!group) resolve([]);
+      if (!group) {
+        resolve([]);
+        return;
+      }
       const {groupName, avatar} = group;
       const record = await ctx.model.RecordGroup.find({groupId});
       if (!record || !record.length) {
@@ -86,12 +89,12 @@ class GroupService extends Service {
         let {fromUserId} = item;
         let fromUserAvatar = await ctx.service.user.avatar(fromUserId);
         list.push({
-          ...pick(item, recordGroupKey),
+          ...pick(item, storeMsgKey),
           fromUserAvatar,
           chatType: "2",
           chatId: groupId,
-          name: groupName,
-          avatar,
+          chatName: groupName,
+          chatAvatar: avatar,
           groupId,
           groupName,
         });

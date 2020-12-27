@@ -17,7 +17,7 @@ const groupPublic = {
 };
 
 // 群组储存字段
-const recordGroupKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
+const storeMsgKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
 
 const roomNameDefault = "publicRoom";
 
@@ -36,7 +36,7 @@ module.exports = {
   avatarDefault,
   admin,
   groupPublic,
-  recordGroupKey,
+  storeMsgKey,
   roomNameDefault,
   getFriendStatusText,
 };

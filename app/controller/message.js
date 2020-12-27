@@ -12,7 +12,7 @@
  */
 
 const Controller = require('../core/baseController');
-const {roomNameDefault, avatarDefault} = require('../core/baseConfig');
+const {roomNameDefault} = require('../core/baseConfig');
 
 class MessageController extends Controller {
   // 聊天记录
@@ -30,60 +30,85 @@ class MessageController extends Controller {
     });
   }
 
-  // 单人对话
-  async message() {
+  // 单聊
+  async messageSingle() {
     const {ctx} = this;
-    const {app, socket, logger, helper} = ctx;
+    const {app, session, socket, logger, helper} = ctx;
+    const {id} = socket;
+    const {username, userId} = session;
     const nsp = app.io.of('/');
-    const id = socket.id;
+    const data = ctx.args[0];
+    const {chatId, chatType, msg, createTime, msgType, withUsername, withUserId} = data;
 
-    // 拼装完整消息体
-    let msgObj = ctx.args[0];
-    msgObj.fromUsername = ctx.session.username;
-    msgObj.fromUserId = ctx.session.userId;
-    await ctx.service.user.getAvatar(msgObj.fromUserId).then(url => {
-      msgObj.fromUserAvatar = url;
-    }).catch(err => {
-      msgObj.fromUserAvatar = defaultAvatar;
-    });
-
-    await ctx.service.user.getAvatar(msgObj.toUserId).then(url => {
-      msgObj.avatar = url;
-    }).catch(err => {
-      msgObj.avatar = defaultAvatar;
-    });
-
-    // 根据 id 给指定连接发送消息（响应发送成功）
-    nsp.sockets[id].emit('messageResponse', msgObj);
-
-    // 查找对方是否在线
-    const onlineList = await ctx.model.Online.find({
-      userId: msgObj.toUserId
-    });
-    if (onlineList.length && onlineList[0].socketId) {
-      try {
-        msgObj.avatar = msgObj.fromUserAvatar;
-        nsp.sockets[onlineList[0].socketId].emit('message', msgObj);
-      } catch (e) {
-      }
+    if (!msg) {
+      nsp.sockets[id].emit('tips', {
+        type: "warning",
+        text: "消息不能为空"
+      });
+      return;
     }
 
-    // 储存聊天记录
-    await ctx.service.message.add(msgObj).then(res => {
-      console.log("储存成功");
-    }).catch(err => {
-      console.log("储存失败", err);
+    // 储存的消息体
+    const storeObj = {
+      singleId: chatId,
+      createTime,
+      msgType,
+      msg,
+      fromUsername: username,
+      fromUserId: userId,
+    };
+
+    // 储存消息记录
+    let user = await ctx.model.User.findOne({userId: withUserId});
+    if (!user) {
+      nsp.sockets[id].emit('tips', {
+        type: "warning",
+        text: "用户不存在"
+      });
+      return;
+    }
+    await ctx.model.RecordSingle.create(storeObj);
+
+    // 推送的消息体
+    const fromUserAvatar = await ctx.service.user.avatar(userId);
+    const pushObj = {
+      ...data,
+      fromUserAvatar,
+      fromUsername: username,
+      fromUserId: userId,
+      withUserAvatar: user.avatar,
+    };
+
+    // 根据 id 给指定连接发送消息（响应发送成功）
+    nsp.sockets[id].emit('messageResponse', {
+      ...pushObj,
+      chatName: pushObj.withUsername,
+      chatAvatar: pushObj.withUserAvatar,
     });
 
-    // 更新聊天列表
-    await ctx.service.chatList.updateChatList(msgObj).then(res => {
-      console.log("更新聊天列表成功");
-    }).catch(err => {
-      console.log("更新聊天列表失败", err);
+    // 检查对方是否在线
+    const online = await ctx.model.Online.findOne({userId: withUserId});
+    if (online && nsp.sockets[online.socketId]) {
+      nsp.sockets[online.socketId].emit('messageResponse', {
+        ...pushObj,
+        chatName: username,
+        chatAvatar: fromUserAvatar,
+        withUsername: username,
+        withUserId: userId,
+        withUserAvatar: fromUserAvatar,
+      });
+    }
+
+    // 更新会话列表
+    await ctx.service.chat.updateChat({
+      username,
+      userId,
+      chatType: "1",
+      chatId
     });
   }
 
-  // 群组聊天
+  // 群组
   async messageGroup() {
     const {ctx} = this;
     const {app, session, socket, logger, helper} = ctx;
@@ -143,6 +168,14 @@ class MessageController extends Controller {
 
     // 给指定房间的每个人发送消息
     nsp.to(groupId).emit('messageResponse', pushObj);
+
+    // 更新会话列表
+    await ctx.service.chat.updateChat({
+      username,
+      userId,
+      chatType: "2",
+      chatId
+    });
   }
 
   /*-------------------------------------- test --------------------------------*/

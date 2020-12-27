@@ -52,7 +52,7 @@ class UserService extends Service {
       await ctx.model.User.create({username, password, userId, group});
 
       // 加入会话列表
-      await ctx.service.chat.appendChat({
+      await ctx.service.chat.updateChat({
         username,
         userId,
         chatId: groupPublic.groupId,
@@ -103,7 +103,7 @@ class UserService extends Service {
       });
 
       // 加入会话列表
-      await ctx.service.chat.appendChat({
+      await ctx.service.chat.updateChat({
         username,
         userId,
         chatId: groupPublic.groupId,

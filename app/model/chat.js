@@ -8,7 +8,6 @@ module.exports = app => {
   const ChatSchema = new Schema({
     username: {
       type: String,
-      unique: true,
       required: true,
       minlength: 2,
       maxlength: 10,
@@ -17,10 +16,25 @@ module.exports = app => {
       type: String,
       required: true,
     },
-    // 即 {chatId:单聊、群聊的ID,chatType:类型(1单聊,2群聊)} 的集合
-    list: {
-      type: Array,
-      default: () => []
+    // 会话类型(1单聊,2群聊)
+    chatType: {
+      type: String,
+      required: true,
+    },
+    // 会话ID(单聊、群聊的ID)
+    chatId: {
+      type: String,
+      required: true,
+    },
+    // 创建时间
+    createTime: {
+      type: Date,
+      default: () => new Date().getTime()
+    },
+    // 编辑时间
+    editTime: {
+      type: Date,
+      required: true,
     }
   });
   return mongoose.model('Chat', ChatSchema);

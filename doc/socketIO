@@ -1,0 +1,11 @@
+/**
+ * socket.io
+ * - nsp:Namespace 命名空间
+ * - nsp.sockets[socketId].emit():给某个用户推送消息
+ * - nsp.to(room).emit():给某个房间推送消息
+ * - nsp.emit():给所有人推送消息
+ * - socket.id:发送消息人的socketID
+ * - socket.handshake:握手 https://www.wenjiangs.com/doc/6ealfln7
+ * - socket.disconnect():断开连接
+ * - ctx.args[0]:消息内容
+ */

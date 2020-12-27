@@ -45,7 +45,8 @@ module.exports = app => {
 
   // chat
   router.get('/chat/list', userAuth, controller.chat.list);
-  router.get('/chat/add', userAuth, controller.chat.add);
+  router.get('/single/send', userAuth, controller.single.send);
+  router.get('/single/record/:singleId', userAuth, controller.single.record);
   router.get('/group/record/:groupId', userAuth, controller.group.record);
 
   // message
@@ -53,6 +54,7 @@ module.exports = app => {
 
   // socket
   io.of('/').route('message', controller.message.message);
+  io.of('/').route('messageSingle', controller.message.messageSingle);
   io.of('/').route('messageGroup', controller.message.messageGroup);
   io.of('/news').route('news', controller.news.index);
 };

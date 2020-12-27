@@ -17,22 +17,6 @@ class ChatController extends Controller {
       });
     });
   }
-
-  // 新增聊天列表
-  async add() {
-    const {ctx} = this;
-    await ctx.service.chat.add().then(res => {
-      this.success({
-        message: "创建成功",
-        data: res
-      });
-    }).catch(err => {
-      this.error({
-        message: "创建失败",
-        info: err
-      });
-    });
-  }
 }
 
 module.exports = ChatController;
