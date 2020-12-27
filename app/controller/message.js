@@ -160,8 +160,8 @@ class MessageController extends Controller {
       fromUserAvatar,
       chatType,
       chatId,
-      name: groupName,
-      avatar,
+      chatName: groupName,
+      chatAvatar: avatar,
       groupId,
       groupName,
     };

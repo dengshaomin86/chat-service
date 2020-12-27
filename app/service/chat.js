@@ -33,6 +33,7 @@ class ChatService extends Service {
               chatAvatar: targetUser.avatar,
               withUsername: targetUser.username,
               withUserId: targetUser.userId,
+              editTime: item.editTime,
             });
             break;
           case "2":
@@ -47,12 +48,16 @@ class ChatService extends Service {
               chatId: groupId,
               chatName: groupName,
               chatAvatar: avatar,
+              editTime: item.editTime,
             });
             break;
         }
       }
 
       // 按编辑时间排序
+      list.sort((a, b) => {
+        return new Date(a.editTime).getTime() < new Date(b.editTime).getTime() ? 1 : -1;
+      });
 
       resolve(list);
     });
