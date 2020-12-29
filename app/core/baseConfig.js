@@ -19,8 +19,6 @@ const groupPublic = {
 // 群组储存字段
 const storeMsgKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
 
-const roomNameDefault = "publicRoom";
-
 // 获取好友请求状态值对应文本
 const getFriendStatusText = (friendStatus) => {
   let map = new Map();
@@ -42,7 +40,6 @@ module.exports = {
   admin,
   groupPublic,
   storeMsgKey,
-  roomNameDefault,
   getFriendStatusText,
   createSingleId,
 };

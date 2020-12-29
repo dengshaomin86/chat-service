@@ -12,7 +12,6 @@
  */
 
 const Controller = require('../core/baseController');
-const {roomNameDefault} = require('../core/baseConfig');
 
 class MessageController extends Controller {
   // 聊天记录
@@ -119,7 +118,7 @@ class MessageController extends Controller {
     const {chatId, chatType, msg, createTime, msgType} = data;
 
     // 获取房间里已连接用户的socketID
-    // nsp.adapter.clients([roomNameDefault], (err, clients) => {
+    // nsp.adapter.clients([roomName], (err, clients) => {
     //   console.log(JSON.stringify(clients));
     // });
 
@@ -178,8 +177,6 @@ class MessageController extends Controller {
     });
   }
 
-  /*-------------------------------------- test --------------------------------*/
-
   // 退出房间
   async testLeave() {
     const {ctx} = this;
@@ -191,7 +188,7 @@ class MessageController extends Controller {
       // 踢出用户前发送消息
       nsp.sockets[id].emit('res', msg);
       // 退出房间
-      ctx.socket.leave(roomNameDefault);
+      ctx.socket.leave("roomName");
 
       // 调用 adapter 方法踢出用户，客户端触发 disconnect 事件
       // nsp.adapter.remoteDisconnect(id, true, err => {
