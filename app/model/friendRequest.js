@@ -1,11 +1,11 @@
 'use strict';
 
-// 好友
+// 好友请求
 module.exports = app => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
 
-  const FriendSchema = new Schema({
+  const FriendRequestSchema = new Schema({
     userId: {
       type: String,
       required: true,
@@ -14,11 +14,16 @@ module.exports = app => {
       type: String,
       required: true,
     },
-    // 备注
-    remark: {
+    // 状态值
+    friendStatus: {
       type: String,
-      default: () => ""
-    }
+      required: true,
+    },
+    // 留言
+    msg: {
+      type: String,
+      required: true,
+    },
   });
-  return mongoose.model('Friend', FriendSchema);
+  return mongoose.model('FriendRequest', FriendRequestSchema);
 };

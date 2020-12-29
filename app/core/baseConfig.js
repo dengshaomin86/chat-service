@@ -32,6 +32,11 @@ const getFriendStatusText = (friendStatus) => {
   return map.get(friendStatus);
 };
 
+// 创建单聊ID
+const createSingleId = (fromUserId, toUserId) => {
+  return `${Math.min(fromUserId, toUserId)}${Math.max(fromUserId, toUserId)}`;
+};
+
 module.exports = {
   avatarDefault,
   admin,
@@ -39,4 +44,5 @@ module.exports = {
   storeMsgKey,
   roomNameDefault,
   getFriendStatusText,
+  createSingleId,
 };

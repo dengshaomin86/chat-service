@@ -156,27 +156,23 @@ class UserService extends Service {
   }
 
   // 获取用户信息
-  info(userId) {
+  info(friendUserId) {
     return new Promise(async (resolve, reject) => {
       const {ctx} = this;
       const {session, params} = ctx;
+      const {userId} = session;
 
-      userId = userId || params.id;
-      let user = await ctx.model.User.findOne({userId});
-      if (!user) {
-        reject("用户不存在");
-        return;
-      }
+      friendUserId = friendUserId || params.id;
+      let friendUser = await ctx.model.User.findOne({userId: friendUserId});
+      if (!friendUser) return reject("用户不存在");
 
-      let info = pick(user, ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
+      let info = pick(friendUser, ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
 
       // 获取好友状态
       let friendStatus = "0";
-      if (userId !== session.userId) {
-        let friend = await ctx.model.Friend.findOne({userId: session.userId});
-        let requestList = (friend && friend.request) || [];
-        let requestObj = requestList.find(fri => fri.userId === userId);
-        if (requestObj) friendStatus = requestObj.friendStatus;
+      if (friendUserId !== userId) {
+        let friendRequest = await ctx.model.FriendRequest.findOne({userId, friendUserId});
+        if (friendRequest) friendStatus = friendRequest.friendStatus;
       }
       let friendStatusText = getFriendStatusText(friendStatus);
 

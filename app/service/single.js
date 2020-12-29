@@ -2,14 +2,9 @@
 
 const {Service} = require('egg');
 const {pick} = require('lodash');
-const {storeMsgKey} = require('../core/baseConfig');
+const {storeMsgKey, createSingleId} = require('../core/baseConfig');
 
 class SingleService extends Service {
-  // 创建单聊ID
-  static createSingleId(fromUserId, toUserId) {
-    return `${Math.min(fromUserId, toUserId)}${Math.max(fromUserId, toUserId)}`;
-  }
-
   // 发起会话
   async send() {
     return new Promise(async (resolve, reject) => {
@@ -25,7 +20,7 @@ class SingleService extends Service {
         return;
       }
 
-      const chatId = await SingleService.createSingleId(userId, withUserId);
+      const chatId = await createSingleId(userId, withUserId);
 
       // 插入会话列表
       await ctx.service.chat.updateChat({

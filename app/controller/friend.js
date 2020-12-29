@@ -89,7 +89,10 @@ class FriendController extends Controller {
     const {ctx} = this;
     await ctx.service.friend.remove().then(r => {
       this.success({
-        message: "删除成功"
+        message: "删除成功",
+        data: {
+          ...r
+        }
       });
     }).catch(err => {
       this.success({
