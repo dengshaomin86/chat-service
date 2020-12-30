@@ -32,17 +32,7 @@ class UserService extends Service {
       const {username, userId} = admin;
 
       const user = await this.findUserByName(username);
-
-      function verify() {
-        if (user) return "用户已存在";
-        return false;
-      }
-
-      let verifyResult = verify();
-      if (verifyResult) {
-        reject(verifyResult);
-        return;
-      }
+      if (user) return reject("用户已存在");
 
       // 创建公共群聊
       await ctx.service.group.createPublic({username, userId});
@@ -75,20 +65,10 @@ class UserService extends Service {
     return new Promise(async (resolve, reject) => {
       const {ctx} = this;
       const {username, password, cfPassword} = ctx.request.body;
-
       const user = await this.findUserByName(username);
 
-      function verify() {
-        if (user) return "用户已存在";
-        if (password !== cfPassword) return "密码不一致，请重新输入";
-        return false;
-      }
-
-      let verifyResult = verify();
-      if (verifyResult) {
-        reject(verifyResult);
-        return;
-      }
+      if (user) return reject("用户已存在");
+      if (password !== cfPassword) return reject("密码不一致，请重新输入");
 
       // 创建用户
       const userId = await this.createUserId();
@@ -122,17 +102,8 @@ class UserService extends Service {
       const {username, password} = ctx.request.body;
       let user = await this.findUserByName(username);
 
-      function verify() {
-        if (!user) return "用户不存在";
-        if (password !== user.password) return "密码错误";
-        return false;
-      }
-
-      const verifyResult = verify();
-      if (verifyResult) {
-        reject(verifyResult);
-        return;
-      }
+      if (!user) return reject("用户不存在");
+      if (password !== user.password) return reject("密码错误");
 
       session.username = user.username;
       session.userId = user.userId;
@@ -192,26 +163,18 @@ class UserService extends Service {
       const {userId} = session;
       const username = query.keyword;
 
-      if (!username) {
-        reject("请输入关键字");
-        return;
-      }
+      if (!username) return reject("请输入关键字");
 
       let user = await this.findUserByName(username);
-      if (!user) {
-        resolve([]);
-        return;
-      }
+      if (!user) return resolve([]);
 
       let info = pick(user, ["username", "userId", "avatar", "nickname", "sex", "hobby", "signature", "createDate"]);
 
       // 获取好友状态
       let friendStatus = "0";
       if (userId !== info.userId) {
-        let friend = await ctx.model.Friend.findOne({userId});
-        let requestList = (friend && friend.request) || [];
-        let requestObj = requestList.find(fri => fri.userId === info.userId);
-        if (requestObj) friendStatus = requestObj.friendStatus;
+        const friendRequest = await ctx.model.FriendRequest.findOne({userId, friendUserId: info.userId});
+        if (friendRequest) friendStatus = friendRequest.friendStatus;
       }
       let friendStatusText = getFriendStatusText(friendStatus);
 
@@ -230,10 +193,7 @@ class UserService extends Service {
       const info = ctx.request.body;
       const {username, userId} = ctx.session;
 
-      if (typeof info !== "object") {
-        reject("参数有误");
-        return;
-      }
+      if (typeof info !== "object") return reject("参数有误");
 
       // 筛选可修改数据
       const editable = ["avatar", "nickname", "sex", "hobby", "signature"];
@@ -243,10 +203,7 @@ class UserService extends Service {
       }
 
       let result = await ctx.model.User.updateOne({userId}, newInfo);
-      if (result.n === 0) {
-        reject("修改失败");
-        return;
-      }
+      if (!result.n) return reject("修改失败");
 
       const user = await ctx.service.user.info(userId);
       resolve(user);

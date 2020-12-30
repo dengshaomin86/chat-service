@@ -136,20 +136,15 @@ class GroupService extends Service {
       const {userId} = session;
       const {groupId} = params;
       const group = await ctx.model.Group.findOne({groupId});
-      if (!group) {
-        resolve([]);
-        return;
-      }
+      if (!group) return resolve([]);
+
       const {groupName, avatar, members} = group;
-
       const member = members.find(item => item.userId === userId);
+      const joinTime = member.joinTime || 0;
       const createTime = member.leaveTime || new Date().getTime();
-      const record = await ctx.model.RecordGroup.find({groupId, createTime: {$lt: createTime}});
+      const record = await ctx.model.RecordGroup.find({groupId, createTime: {$gt: joinTime, $lt: createTime}});
+      if (!record || !record.length) return resolve([]);
 
-      if (!record || !record.length) {
-        resolve([]);
-        return;
-      }
       // 处理消息内容
       let list = [];
       for (let idx  in record) {
