@@ -66,27 +66,34 @@ class ChatService extends Service {
     });
   }
 
+  // 删除会话
+  remove() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, params} = ctx;
+      const {userId} = session;
+      const {chatId} = params;
+      await ctx.model.Chat.deleteOne({userId, chatId});
+      resolve();
+    });
+  }
+
   // 更新会话(不存在则新增)
   updateChat({chatId, chatType, username, userId}) {
     return new Promise(async (resolve, reject) => {
       const {ctx} = this;
 
-      let chat = await ctx.model.Chat.findOne({userId, chatId});
-      if (!chat) {
-        await ctx.model.Chat.create({
-          userId,
-          username,
-          chatType,
-          chatId,
-          editTime: new Date().getTime()
-        });
-        resolve("success");
-        return;
-      }
-
-      await ctx.model.Chat.updateMany({chatId}, {
+      await ctx.model.Chat.findOneAndUpdate({userId, chatId}, {
+        userId,
+        username,
+        chatType,
+        chatId,
         editTime: new Date().getTime()
-      });
+      }, {upsert: true});
+
+      await ctx.model.Chat.findOneAndUpdate({chatId}, {
+        editTime: new Date().getTime()
+      }, {new: true});
 
       resolve("success");
     });

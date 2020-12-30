@@ -27,12 +27,13 @@ class GroupController extends Controller {
   // 消息记录
   async record() {
     const {ctx} = this;
-    await ctx.service.group.record().then(list => {
+    await ctx.service.group.record().then(data => {
       this.success({
-        list
+        ...data
       });
     }).catch(err => {
       this.error({
+        message: err,
         err
       })
     });

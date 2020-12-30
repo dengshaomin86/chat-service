@@ -15,10 +15,7 @@ class SingleService extends Service {
 
       // 获取用户信息
       const user = await ctx.model.User.findOne({userId: withUserId});
-      if (!user) {
-        reject("用户不存在");
-        return;
-      }
+      if (!user) return reject("用户不存在");
 
       const chatId = await createSingleId(userId, withUserId);
 
@@ -53,16 +50,10 @@ class SingleService extends Service {
 
       let withUserId = singleId.replace(userId, "");
       let withUser = await ctx.model.User.findOne({userId: withUserId});
-      if (!withUser) {
-        resolve([]);
-        return;
-      }
+      if (!withUser) return resolve([]);
 
       const record = await ctx.model.RecordSingle.find({singleId});
-      if (!record || !record.length) {
-        resolve([]);
-        return;
-      }
+      if (!record || !record.length) return resolve([]);
 
       // 处理消息内容
       let list = [];

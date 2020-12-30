@@ -136,14 +136,14 @@ class GroupService extends Service {
       const {userId} = session;
       const {groupId} = params;
       const group = await ctx.model.Group.findOne({groupId});
-      if (!group) return resolve([]);
+      if (!group) return reject("群聊不存在");
 
-      const {groupName, avatar, members} = group;
+      const {groupName, avatar, members, disband} = group;
       const member = members.find(item => item.userId === userId);
       const joinTime = member.joinTime || 0;
       const createTime = member.leaveTime || new Date().getTime();
       const record = await ctx.model.RecordGroup.find({groupId, createTime: {$gt: joinTime, $lt: createTime}});
-      if (!record || !record.length) return resolve([]);
+      if (!record || !record.length) return resolve({list: [], enable: !disband});
 
       // 处理消息内容
       let list = [];
@@ -160,7 +160,7 @@ class GroupService extends Service {
           chatAvatar: avatar,
         });
       }
-      resolve(list);
+      resolve({list, enable: !disband});
     });
   }
 

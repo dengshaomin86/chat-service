@@ -101,8 +101,8 @@ class MessageController extends Controller {
 
     // 更新会话列表
     await ctx.service.chat.updateChat({
-      username,
-      userId,
+      username: withUsername,
+      userId: withUserId,
       chatType: "1",
       chatId
     });

@@ -17,6 +17,21 @@ class ChatController extends Controller {
       });
     });
   }
+
+  // 删除会话
+  async remove() {
+    const {ctx} = this;
+    await ctx.service.chat.remove().then(res => {
+      this.success({
+        message: "删除成功",
+      });
+    }).catch(err => {
+      this.error({
+        message: "删除失败",
+        info: err
+      });
+    });
+  }
 }
 
 module.exports = ChatController;

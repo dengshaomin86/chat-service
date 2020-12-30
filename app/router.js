@@ -45,6 +45,7 @@ module.exports = app => {
 
   // chat
   router.get('/chat/list', userAuth, controller.chat.list);
+  router.delete('/chat/remove/:chatId', userAuth, controller.chat.remove);
   router.get('/single/send', userAuth, controller.single.send);
   router.get('/single/record/:singleId', userAuth, controller.single.record);
   router.get('/group/record/:groupId', userAuth, controller.group.record);
