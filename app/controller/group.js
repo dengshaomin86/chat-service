@@ -12,6 +12,16 @@ class GroupController extends Controller {
   // 创建
   async create() {
     const {ctx} = this;
+    await ctx.service.group.create().then(data => {
+      this.success({
+        message: "创建成功",
+        data
+      });
+    }).catch(err => {
+      this.error({
+        err
+      })
+    });
   }
 
   // 消息记录

@@ -12,6 +12,7 @@
  */
 
 const Controller = require('../core/baseController');
+const {getGroupName} = require("../core/baseConfig");
 
 class MessageController extends Controller {
   // 聊天记录
@@ -153,13 +154,13 @@ class MessageController extends Controller {
 
     // 推送的消息体
     const fromUserAvatar = await ctx.service.user.avatar(userId);
-    const {groupName, avatar, groupId} = group;
+    const {groupName, avatar, groupId, members} = group;
     const pushObj = {
       ...storeObj,
       fromUserAvatar,
       chatType,
       chatId,
-      chatName: groupName,
+      chatName: getGroupName(groupName, members),
       chatAvatar: avatar,
       groupId,
       groupName,
@@ -175,6 +176,14 @@ class MessageController extends Controller {
       chatType: "2",
       chatId
     });
+  }
+
+  // 加入房间
+  async joinRoom() {
+    const {ctx} = this;
+    const {socket} = ctx;
+    const data = ctx.args[0];
+    socket.join(data);
   }
 
   // 退出房间

@@ -2,7 +2,7 @@
 
 const {Service} = require('egg');
 const {pick} = require('lodash');
-const {storeMsgKey} = require('../core/baseConfig');
+const {storeMsgKey, getGroupName} = require('../core/baseConfig');
 
 class ChatService extends Service {
   // 获取聊天列表
@@ -39,14 +39,14 @@ class ChatService extends Service {
           case "2":
             const group = await ctx.model.Group.findOne({groupId: item.chatId});
             if (!group) continue;
-            const {groupId, groupName, avatar} = group;
+            const {groupId, groupName, avatar, members} = group;
             const record = await ctx.model.RecordGroup.find({groupId});
             if (!record || !record.length) continue;
             list.push({
               ...pick(record[record.length - 1], storeMsgKey),
               chatType: "2",
               chatId: groupId,
-              chatName: groupName,
+              chatName: getGroupName(groupName, members),
               chatAvatar: avatar,
               editTime: item.editTime,
             });

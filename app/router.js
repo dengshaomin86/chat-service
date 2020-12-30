@@ -48,6 +48,7 @@ module.exports = app => {
   router.get('/single/send', userAuth, controller.single.send);
   router.get('/single/record/:singleId', userAuth, controller.single.record);
   router.get('/group/record/:groupId', userAuth, controller.group.record);
+  router.post('/group/create', userAuth, controller.group.create);
 
   // message
   router.get('/message/list', userAuth, controller.message.list);
@@ -56,5 +57,6 @@ module.exports = app => {
   io.of('/').route('message', controller.message.message);
   io.of('/').route('messageSingle', controller.message.messageSingle);
   io.of('/').route('messageGroup', controller.message.messageGroup);
+  io.of('/').route('joinRoom', controller.message.joinRoom);
   io.of('/news').route('news', controller.news.index);
 };

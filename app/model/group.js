@@ -10,14 +10,11 @@ module.exports = app => {
   const GroupSchema = new Schema({
     groupName: {
       type: String,
-      unique: true,
-      required: true,
-      minlength: 2,
-      maxlength: 10,
     },
     groupId: {
       type: String,
       required: true,
+      unique: true,
     },
     // 群主
     master: {
@@ -36,6 +33,7 @@ module.exports = app => {
     // 群组成员
     members: {
       type: Array,
+      required: true,
       default: () => []
     },
     createDate: {

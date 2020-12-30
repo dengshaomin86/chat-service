@@ -19,6 +19,13 @@ const groupPublic = {
 // 群组储存字段
 const storeMsgKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
 
+// 获取群组名称
+const getGroupName = (groupName, members) => {
+  if (groupName) return groupName;
+  if (members.length < 4) return members.map(item => item.username).join("、");
+  return `${members.slice(0, 3).map(item => item.username).join("、")}...`;
+};
+
 // 获取好友请求状态值对应文本
 const getFriendStatusText = (friendStatus) => {
   let map = new Map();
@@ -40,6 +47,7 @@ module.exports = {
   admin,
   groupPublic,
   storeMsgKey,
+  getGroupName,
   getFriendStatusText,
   createSingleId,
 };

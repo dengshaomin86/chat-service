@@ -3,7 +3,7 @@
 const {Service} = require('egg');
 const {pick} = require('lodash');
 
-const {groupPublic, storeMsgKey} = require("../core/baseConfig");
+const {groupPublic, storeMsgKey, getGroupName} = require("../core/baseConfig");
 
 class GroupService extends Service {
   // 创建群组ID
@@ -37,7 +37,70 @@ class GroupService extends Service {
 
   // 创建群聊
   async create() {
-    const {ctx} = this;
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, request, app} = ctx;
+      const {username, userId} = session;
+      const {body} = request;
+      let {members} = body;
+      const nsp = app.io.of('/');
+
+      // 入参校验
+      if (!members || !members.length) return reject("请勾选群成员");
+
+      // 校验成员是否存在
+
+      // 校验双方是否都是好友（对方已删除好友时需要对方同意）
+
+      // 创建群聊
+      members.unshift({username, userId});
+      const res = await ctx.model.Group.create({
+        groupName: null,
+        groupId: GroupService.createGroupId(userId),
+        master: userId,
+        members,
+      });
+
+      // 创建群聊信息
+      await ctx.model.RecordGroup.create({
+        groupId: res.groupId,
+        msgType: "1",
+        msg: "欢迎加入群聊",
+        fromUsername: username,
+        fromUserId: userId,
+        createTime: new Date().getTime(),
+      });
+
+      // 加入所有成员的会话列表，并推送消息刷新会话列表
+      for (let idx in members) {
+        let item = members[idx];
+
+        // 加入用户信息
+        let user = await ctx.model.User.findOne({userId: item.userId});
+        let {group} = user;
+        group = [...new Set([...group, res.groupId])];
+        await ctx.model.User.updateOne({userId: item.userId}, {group});
+
+        // 加入会话列表
+        await ctx.service.chat.updateChat({
+          chatId: res.groupId,
+          chatType: "2",
+          username: item.username,
+          userId: item.userId
+        });
+
+        // 推送消息
+        let online = await ctx.model.Online.findOne({userId: item.userId});
+        if (online && online.socketId && nsp.sockets[online.socketId]) {
+          nsp.sockets[online.socketId].emit("group", {
+            type: "joinRoom",
+            groupId: res.groupId
+          });
+        }
+      }
+
+      resolve(pick(res, ["groupName", "groupId", "master", "members", "avatar", "announcement"]));
+    });
   }
 
   // 加入群聊
@@ -76,7 +139,7 @@ class GroupService extends Service {
         resolve([]);
         return;
       }
-      const {groupName, avatar} = group;
+      const {groupName, avatar, members} = group;
       const record = await ctx.model.RecordGroup.find({groupId});
       if (!record || !record.length) {
         resolve([]);
@@ -93,7 +156,7 @@ class GroupService extends Service {
           fromUserAvatar,
           chatType: "2",
           chatId: groupId,
-          chatName: groupName,
+          chatName: getGroupName(groupName, members),
           chatAvatar: avatar,
           groupId,
           groupName,
