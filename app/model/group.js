@@ -36,6 +36,11 @@ module.exports = app => {
       required: true,
       default: () => []
     },
+    // 是否已解散
+    disband: {
+      type: Boolean,
+      default: false
+    },
     createDate: {
       type: String,
       default: () => new Date().getTime()

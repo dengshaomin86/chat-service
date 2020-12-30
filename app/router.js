@@ -53,6 +53,8 @@ module.exports = app => {
   router.patch('/group/update', userAuth, controller.group.update);
   router.patch('/group/remove', userAuth, controller.group.remove);
   router.patch('/group/append', userAuth, controller.group.append);
+  router.patch('/group/quit', userAuth, controller.group.quit);
+  router.delete('/group/disband/:groupId', userAuth, controller.group.disband);
 
   // message
   router.get('/message/list', userAuth, controller.message.list);

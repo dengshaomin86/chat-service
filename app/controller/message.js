@@ -124,11 +124,10 @@ class MessageController extends Controller {
     // });
 
     if (!msg) {
-      nsp.sockets[id].emit('tips', {
+      return nsp.sockets[id].emit('tips', {
         type: "warning",
         text: "消息不能为空"
       });
-      return;
     }
 
     // 储存的消息体
@@ -143,11 +142,18 @@ class MessageController extends Controller {
 
     // 储存消息记录
     let group = await ctx.model.Group.findOne({groupId: chatId});
-    const {groupName, avatar, groupId, members} = group;
+    const {groupName, avatar, groupId, members, disband} = group;
     if (!group) {
       return nsp.sockets[id].emit('tips', {
         type: "warning",
         text: "群聊不存在"
+      });
+    }
+
+    if (disband) {
+      return nsp.sockets[id].emit('tips', {
+        type: "warning",
+        text: "此群聊已解散"
       });
     }
 
@@ -171,8 +177,6 @@ class MessageController extends Controller {
       chatId,
       chatName: getGroupName(groupName, members),
       chatAvatar: avatar,
-      groupId,
-      groupName,
     };
 
     // 给指定房间的每个人发送消息

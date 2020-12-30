@@ -47,6 +47,7 @@ class GroupController extends Controller {
       });
     }).catch(err => {
       this.error({
+        message: err,
         err
       })
     });
@@ -90,6 +91,38 @@ class GroupController extends Controller {
     await ctx.service.group.append().then(data => {
       this.success({
         message: "添加成功",
+        data
+      });
+    }).catch(err => {
+      this.error({
+        message: err,
+        err
+      })
+    });
+  }
+
+  // 退出群聊
+  async quit() {
+    const {ctx} = this;
+    await ctx.service.group.quit().then(data => {
+      this.success({
+        message: "退出成功",
+        data
+      });
+    }).catch(err => {
+      this.error({
+        message: err,
+        err
+      })
+    });
+  }
+
+  // 解散群聊
+  async disband() {
+    const {ctx} = this;
+    await ctx.service.group.disband().then(data => {
+      this.success({
+        message: "解散成功",
         data
       });
     }).catch(err => {

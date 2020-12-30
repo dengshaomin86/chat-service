@@ -158,8 +158,6 @@ class GroupService extends Service {
           chatId: groupId,
           chatName: getGroupName(groupName, members),
           chatAvatar: avatar,
-          groupId,
-          groupName,
         });
       }
       resolve(list);
@@ -174,6 +172,7 @@ class GroupService extends Service {
       const {groupId} = params;
       const group = await ctx.model.Group.findOne({groupId});
       if (!group) return reject("群聊不存在");
+      if (group.disband) return reject("此群聊已解散");
       resolve(this.handlerGroupInfo(group));
     });
   }
@@ -275,8 +274,16 @@ class GroupService extends Service {
         if (member && !member.leaveTime) return reject("用户已经在群聊内了");
         if (member) members.splice(members.findIndex(item => item.userId === memberId), 1);
 
-        const user = await ctx.model.User.findOne({userId: memberId});
+        let user = await ctx.model.User.findOne({userId: memberId});
         if (!user) return reject("用户不存在");
+
+        // 加入新成员的会话列表
+        await ctx.service.chat.updateChat({
+          chatId: groupId,
+          chatType: "2",
+          username: user.username,
+          userId: user.userId
+        });
 
         members.push({
           username: user.username,
@@ -297,6 +304,69 @@ class GroupService extends Service {
       let modify = {members};
       let res = await ctx.model.Group.findOneAndUpdate({groupId}, modify, {new: true});
       resolve(this.handlerGroupInfo(res));
+    });
+  }
+
+  // 退出群聊
+  async quit() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, request, app} = ctx;
+      const {userId} = session;
+      const {groupId} = request.body;
+      const nsp = app.io.of('/');
+
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) return reject("群聊不存在");
+      let {members} = group;
+
+      // 删除会话列表数据
+      await ctx.model.Chat.deleteOne({userId, chatId: groupId});
+
+      // 推送消息
+      let online = await ctx.model.Online.findOne({userId});
+      if (online && online.socketId && nsp.sockets[online.socketId]) {
+        nsp.sockets[online.socketId].emit("group", {
+          type: "leaveRoom",
+          groupId: groupId
+        });
+      }
+
+      for (let idx in members) {
+        let item = members[idx];
+        if (item.userId === userId) {
+          item.leaveTime = new Date().getTime();
+          break;
+        }
+      }
+
+      let modify = {members};
+      let res = await ctx.model.Group.findOneAndUpdate({groupId}, modify, {new: true});
+      resolve(this.handlerGroupInfo(res));
+    });
+  }
+
+  // 解散群聊
+  async disband() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, params} = ctx;
+      const {userId} = session;
+      const {groupId} = params;
+
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) return reject("群聊不存在");
+      let {master} = group;
+      if (master !== userId) return reject("您不是群主");
+
+      // 删除会话列表数据
+      await ctx.model.Chat.deleteOne({userId, chatId: groupId});
+
+      // 标记解散
+      let modify = {disband: true};
+      await ctx.model.Group.findOneAndUpdate({groupId}, modify, {new: true});
+
+      resolve();
     });
   }
 }
