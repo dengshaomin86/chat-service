@@ -316,6 +316,8 @@ class GroupService extends Service {
       const {groupId} = request.body;
       const nsp = app.io.of('/');
 
+      if (groupPublic.groupId === groupId) return reject("Sorry，此群无法退出");
+
       const group = await ctx.model.Group.findOne({groupId});
       if (!group) return reject("群聊不存在");
       let {members} = group;
