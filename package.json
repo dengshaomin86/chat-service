@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "egg-scripts start --daemon --title=egg-server-chat-service",
-    "stop": "egg-scripts stop --title=egg-server-chat-service",
+    "stop": "egg-scripts stop --title=egg-server-chat-serve-egg",
     "dev": "egg-bin dev --port 3000",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
