@@ -2,7 +2,7 @@
 
 const Controller = require('../core/baseController');
 
-// 群组
+// 群聊
 class GroupController extends Controller {
   // 列表
   async list() {
@@ -33,6 +33,68 @@ class GroupController extends Controller {
       });
     }).catch(err => {
       this.error({
+        err
+      })
+    });
+  }
+
+  // 群聊信息
+  async info() {
+    const {ctx} = this;
+    await ctx.service.group.info().then(data => {
+      this.success({
+        data
+      });
+    }).catch(err => {
+      this.error({
+        err
+      })
+    });
+  }
+
+  // 修改群聊信息
+  async update() {
+    const {ctx} = this;
+    await ctx.service.group.update().then(data => {
+      this.success({
+        message: "修改成功",
+        data
+      });
+    }).catch(err => {
+      this.error({
+        message: err,
+        err
+      })
+    });
+  }
+
+  // 移出群成员
+  async remove() {
+    const {ctx} = this;
+    await ctx.service.group.remove().then(data => {
+      this.success({
+        message: "移出成功",
+        data
+      });
+    }).catch(err => {
+      this.error({
+        message: err,
+        err
+      })
+    });
+  }
+
+  // 添加群成员
+  async append() {
+    const {ctx} = this;
+    await ctx.service.group.append().then(data => {
+      this.success({
+        message: "添加成功",
+        data
+      });
+    }).catch(err => {
+      this.error({
+        message: err,
         err
       })
     });

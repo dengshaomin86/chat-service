@@ -49,7 +49,7 @@ module.exports = app => {
       type: String,
       default: () => ""
     },
-    // 用户所在群组
+    // 用户所在群聊
     group: {
       type: Array,
       default: () => []

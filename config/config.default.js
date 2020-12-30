@@ -36,6 +36,7 @@ module.exports = appInfo => {
       options: {
         useUnifiedTopology: true,
         useCreateIndex: true,
+        useFindAndModify: false,
       },
     },
   };

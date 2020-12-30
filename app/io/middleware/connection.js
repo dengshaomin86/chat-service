@@ -12,9 +12,13 @@ module.exports = () => {
       // 加入房间
       const {userId} = ctx.session;
       const user = await ctx.model.User.findOne({userId});
-      const {group} = user;
-      for (let idx in group) {
-        ctx.socket.join(group[idx]);
+      const groups = user.group;
+      for (let idx in groups) {
+        const groupId = groups[idx];
+        const group = await ctx.model.Group.findOne({groupId});
+        const {members} = group;
+        const member = members.find(item => item.userId === userId);
+        if (!member.leaveTime) ctx.socket.join(groupId);
       }
     }
     // 放行

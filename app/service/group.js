@@ -6,7 +6,7 @@ const {pick} = require('lodash');
 const {groupPublic, storeMsgKey, getGroupName} = require("../core/baseConfig");
 
 class GroupService extends Service {
-  // 创建群组ID
+  // 创建群聊ID
   static createGroupId(userId) {
     return `g${new Date().getTime()}${userId}`;
   }
@@ -15,7 +15,7 @@ class GroupService extends Service {
   async createPublic({username, userId}) {
     const {ctx} = this;
 
-    // 创建群组
+    // 创建群聊
     await ctx.model.Group.create({
       ...groupPublic,
       master: userId,
@@ -110,7 +110,7 @@ class GroupService extends Service {
 
       let group = await ctx.model.Group.findOne({groupId});
       if (!group) {
-        reject("群组不存在");
+        reject("群聊不存在");
         return;
       }
 
@@ -133,6 +133,7 @@ class GroupService extends Service {
     return new Promise(async (resolve, reject) => {
       const {ctx} = this;
       const {session, params} = ctx;
+      const {userId} = session;
       const {groupId} = params;
       const group = await ctx.model.Group.findOne({groupId});
       if (!group) {
@@ -140,7 +141,11 @@ class GroupService extends Service {
         return;
       }
       const {groupName, avatar, members} = group;
-      const record = await ctx.model.RecordGroup.find({groupId});
+
+      const member = members.find(item => item.userId === userId);
+      const createTime = member.leaveTime || new Date().getTime();
+      const record = await ctx.model.RecordGroup.find({groupId, createTime: {$lt: createTime}});
+
       if (!record || !record.length) {
         resolve([]);
         return;
@@ -163,6 +168,140 @@ class GroupService extends Service {
         });
       }
       resolve(list);
+    });
+  }
+
+  // 群聊信息
+  async info() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, params} = ctx;
+      const {groupId} = params;
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) return reject("群聊不存在");
+      resolve(this.handlerGroupInfo(group));
+    });
+  }
+
+  // 处理群聊返回的数据
+  async handlerGroupInfo(group) {
+    const {ctx} = this;
+    const {groupName, members} = group;
+
+    // 遍历群成员拿到用户信息
+    let list = [];
+    for (let idx in members) {
+      let member = members[idx];
+      if (member.leaveTime) continue;
+      let user = await ctx.model.User.findOne({userId: member.userId});
+      if (!user) continue;
+      list.push(pick(user, ["username", "userId", "avatar"]));
+    }
+
+    return {
+      ...pick(group, ["groupId", "master", "avatar", "announcement"]),
+      groupName: getGroupName(groupName, members),
+      members: list,
+    };
+  }
+
+  // 修改群聊信息
+  async update() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, request} = ctx;
+      const {groupId, groupName, announcement} = request.body;
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) return reject("群聊不存在");
+
+      let modify = {};
+      if (groupName) modify.groupName = groupName;
+      if (announcement) modify.announcement = announcement;
+      let res = await ctx.model.Group.findOneAndUpdate({groupId}, modify, {new: true});
+      resolve(this.handlerGroupInfo(res));
+    });
+  }
+
+  // 移出群成员
+  async remove() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, request, app} = ctx;
+      const {userId} = session;
+      const {groupId, memberId} = request.body;
+      const nsp = app.io.of('/');
+
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) return reject("群聊不存在");
+      let {master, members} = group;
+      if (master !== userId) return reject("您不是群主");
+
+      // 推送消息
+      let online = await ctx.model.Online.findOne({userId: memberId});
+      if (online && online.socketId && nsp.sockets[online.socketId]) {
+        nsp.sockets[online.socketId].emit("group", {
+          type: "leaveRoom",
+          groupId: groupId
+        });
+      }
+
+      for (let idx in members) {
+        let item = members[idx];
+        if (item.userId === memberId) {
+          item.leaveTime = new Date().getTime();
+          break;
+        }
+      }
+
+      let modify = {members};
+      let res = await ctx.model.Group.findOneAndUpdate({groupId}, modify, {new: true});
+      resolve(this.handlerGroupInfo(res));
+    });
+  }
+
+  // 添加群成员
+  async append() {
+    return new Promise(async (resolve, reject) => {
+      const {ctx} = this;
+      const {session, request, app} = ctx;
+      const {userId} = session;
+      const {groupId} = request.body;
+      const membersRequest = request.body.members;
+      const nsp = app.io.of('/');
+
+      const group = await ctx.model.Group.findOne({groupId});
+      if (!group) return reject("群聊不存在");
+      let {members} = group;
+
+      // 校验是否已经存在
+      for (let idx in membersRequest) {
+        let memberId = membersRequest[idx].userId;
+        let member = members.find(item => item.userId === memberId);
+        if (member && !member.leaveTime) return reject("用户已经在群聊内了");
+        if (member) members.splice(members.findIndex(item => item.userId === memberId), 1);
+
+        const user = await ctx.model.User.findOne({userId: memberId});
+        if (!user) return reject("用户不存在");
+
+        members.push({
+          username: user.username,
+          userId: user.userId,
+          joinTime: new Date().getTime(),
+        });
+
+        // 推送消息
+        let online = await ctx.model.Online.findOne({userId: memberId});
+        if (online && online.socketId && nsp.sockets[online.socketId]) {
+          nsp.sockets[online.socketId].emit("group", {
+            type: "joinRoom",
+            groupId: groupId
+          });
+        }
+      }
+
+      let modify = {members};
+      let res = await ctx.model.Group.findOneAndUpdate({groupId}, modify, {new: true});
+      resolve(this.handlerGroupInfo(res));
     });
   }
 }

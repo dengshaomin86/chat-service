@@ -30,7 +30,7 @@ module.exports = app => {
       type: String,
       default: ""
     },
-    // 群组成员
+    // 群聊成员
     members: {
       type: Array,
       required: true,

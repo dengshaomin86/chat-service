@@ -40,7 +40,9 @@ class ChatService extends Service {
             const group = await ctx.model.Group.findOne({groupId: item.chatId});
             if (!group) continue;
             const {groupId, groupName, avatar, members} = group;
-            const record = await ctx.model.RecordGroup.find({groupId});
+            const member = members.find(item => item.userId === userId);
+            const createTime = member.leaveTime || new Date().getTime();
+            const record = await ctx.model.RecordGroup.find({groupId, createTime: {$lt: createTime}});
             if (!record || !record.length) continue;
             list.push({
               ...pick(record[record.length - 1], storeMsgKey),

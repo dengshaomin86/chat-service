@@ -9,17 +9,17 @@ const admin = {
   userId: "000001",
 };
 
-// 公共群组
+// 公共群聊
 const groupPublic = {
   groupName: "默认群聊",
   groupId: "g000001",
   msg: "Hello",
 };
 
-// 群组储存字段
+// 群聊储存字段
 const storeMsgKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
 
-// 获取群组名称
+// 获取群聊名称
 const getGroupName = (groupName, members) => {
   if (groupName) return groupName;
   if (members.length < 4) return members.map(item => item.username).join("、");

@@ -108,7 +108,7 @@ class MessageController extends Controller {
     });
   }
 
-  // 群组
+  // 群聊
   async messageGroup() {
     const {ctx} = this;
     const {app, session, socket, logger, helper} = ctx;
@@ -143,18 +143,27 @@ class MessageController extends Controller {
 
     // 储存消息记录
     let group = await ctx.model.Group.findOne({groupId: chatId});
+    const {groupName, avatar, groupId, members} = group;
     if (!group) {
-      nsp.sockets[id].emit('tips', {
+      return nsp.sockets[id].emit('tips', {
         type: "warning",
-        text: "群组不存在"
+        text: "群聊不存在"
       });
-      return;
     }
+
+    // 是否是群成员
+    const member = members.find(item => item.userId === userId);
+    if (!member || member.leaveTime) {
+      return nsp.sockets[id].emit('tips', {
+        type: "warning",
+        text: "消息发送失败，您不是该群成员"
+      });
+    }
+
     await ctx.model.RecordGroup.create(storeObj);
 
     // 推送的消息体
     const fromUserAvatar = await ctx.service.user.avatar(userId);
-    const {groupName, avatar, groupId, members} = group;
     const pushObj = {
       ...storeObj,
       fromUserAvatar,
@@ -187,33 +196,11 @@ class MessageController extends Controller {
   }
 
   // 退出房间
-  async testLeave() {
+  async leaveRoom() {
     const {ctx} = this;
-    const {app, socket, logger, helper} = ctx;
-    const nsp = app.io.of('/');
-
-    // 踢出用户
-    const tick = (id, msg) => {
-      // 踢出用户前发送消息
-      nsp.sockets[id].emit('res', msg);
-      // 退出房间
-      ctx.socket.leave("roomName");
-
-      // 调用 adapter 方法踢出用户，客户端触发 disconnect 事件
-      // nsp.adapter.remoteDisconnect(id, true, err => {
-      //   logger.error(err);
-      // });
-    };
-
-    const {username} = ctx.session;
-    const user = await ctx.model.Online.findOne({
-      username
-    });
-
-    if (user && user.socketId) {
-      tick(user.socketId, "out");
-    }
-
+    const {socket} = ctx;
+    const data = ctx.args[0];
+    socket.leave(data);
   }
 }
 
