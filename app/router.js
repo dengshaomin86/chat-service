@@ -23,6 +23,7 @@ module.exports = app => {
   // common
   router.get('/checkOnline', userAuth, controller.common.checkOnline);
   router.post('/uploadImg', userAuth, controller.common.uploadImg);
+  router.post('/uploadFile', userAuth, controller.common.uploadFile);
 
   // user
   router.get('/create/admin/:password', controller.user.createAdmin);

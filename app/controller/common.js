@@ -12,9 +12,19 @@ class HomeController extends Controller {
 
   // 图片上传
   async uploadImg() {
-    const {url, fields} = await this.uploadFile();
+    const {url, fields} = await this.upload();
     this.success({
       message: "图片上传成功",
+      url,
+      fields
+    });
+  }
+
+  // 文件上传
+  async uploadFile() {
+    const {url, fields} = await this.upload();
+    this.success({
+      message: "文件上传成功",
       url,
       fields
     });

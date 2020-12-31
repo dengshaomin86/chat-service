@@ -95,6 +95,11 @@ module.exports = appInfo => {
     // buffer: true, // in prod env, false in other envs
   };
 
+  // 增加支持上传的文件拓展名
+  config.multipart = {
+    fileExtensions: ['.txt']
+  };
+
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',

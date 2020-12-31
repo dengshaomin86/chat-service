@@ -34,14 +34,17 @@ class BaseController extends Controller {
   }
 
   // 上传文件的通用方法
-  async uploadFile() {
+  async upload() {
+    console.log(111);
     const stream = await this.ctx.getFileStream();
     // 基础的目录
     const uploadBasePath = 'app/public/upload';
     // 分类目录
+    console.log(stream.fieldname);
     const category = stream.fieldname;
     // 生成文件名
     const filename = `${moment().format("YYYYMMDDHHmmss")}_${parseInt(Math.random() * 1e6,)}${path.extname(stream.filename).toLocaleLowerCase()}`;
+    console.log(filename);
     // 生成目录
     function mkdirsSync(dirname) {
       if (fs.existsSync(dirname)) {
