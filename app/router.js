@@ -18,8 +18,7 @@ module.exports = app => {
 
   // views
   router.get('/', controller.views.index);
-  router.get('/view/test', controller.views.test);
-  router.get('/view/test2', controller.views.test2);
+  router.get('/view/renderString', controller.views.renderString);
 
   // common
   router.get('/checkOnline', userAuth, controller.common.checkOnline);
