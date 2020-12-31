@@ -45,6 +45,7 @@ module.exports = app => {
   // chat
   router.get('/chat/list', userAuth, controller.chat.list);
   router.delete('/chat/remove/:chatId', userAuth, controller.chat.remove);
+  router.get('/message/list', userAuth, controller.message.list);
   router.get('/single/send', userAuth, controller.single.send);
   router.get('/single/record/:singleId', userAuth, controller.single.record);
   router.get('/group/record/:groupId', userAuth, controller.group.record);
@@ -56,14 +57,10 @@ module.exports = app => {
   router.patch('/group/quit', userAuth, controller.group.quit);
   router.delete('/group/disband/:groupId', userAuth, controller.group.disband);
 
-  // message
-  router.get('/message/list', userAuth, controller.message.list);
-
   // socket
   io.of('/').route('message', controller.message.message);
   io.of('/').route('messageSingle', controller.message.messageSingle);
   io.of('/').route('messageGroup', controller.message.messageGroup);
   io.of('/').route('joinRoom', controller.message.joinRoom);
   io.of('/').route('leaveRoom', controller.message.leaveRoom);
-  io.of('/news').route('news', controller.news.index);
 };
