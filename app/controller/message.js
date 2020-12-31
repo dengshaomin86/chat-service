@@ -12,7 +12,7 @@
  */
 
 const Controller = require('../core/baseController');
-const {getGroupName} = require("../core/baseConfig");
+const {getGroupName, createMsgId} = require("../core/baseConfig");
 
 class MessageController extends Controller {
   // 聊天记录
@@ -54,6 +54,7 @@ class MessageController extends Controller {
       createTime,
       msgType,
       msg,
+      msgId: createMsgId(),
       fromUsername: username,
       fromUserId: userId,
     };
@@ -73,6 +74,7 @@ class MessageController extends Controller {
     const fromUserAvatar = await ctx.service.user.avatar(userId);
     const pushObj = {
       ...data,
+      ...storeObj,
       fromUserAvatar,
       fromUsername: username,
       fromUserId: userId,
@@ -136,6 +138,7 @@ class MessageController extends Controller {
       createTime,
       msgType,
       msg,
+      msgId: createMsgId(),
       fromUsername: username,
       fromUserId: userId,
     };

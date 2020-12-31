@@ -31,6 +31,12 @@ module.exports = app => {
       type: String,
       required: true,
     },
+    // 消息ID
+    msgId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     // 发送时间
     createTime: {
       type: Date,

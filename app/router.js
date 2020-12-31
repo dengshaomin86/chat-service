@@ -16,15 +16,14 @@ module.exports = app => {
   const gzip = app.middleware.gzip({threshold: 1024});
   const userAuth = app.middleware.userauth({}, app);
 
-  // home
-  router.get('/', controller.home.index);
-  router.get('/checkOnline', userAuth, controller.home.checkOnline);
-  router.post('/uploadImg', userAuth, controller.home.uploadImg);
+  // views
+  router.get('/', controller.views.index);
+  router.get('/view/test', controller.views.test);
+  router.get('/view/test2', controller.views.test2);
 
-  // view
-  router.get('/view', controller.view.index);
-  router.get('/view/test', controller.view.test);
-  router.get('/view/test2', controller.view.test2);
+  // common
+  router.get('/checkOnline', userAuth, controller.common.checkOnline);
+  router.post('/uploadImg', userAuth, controller.common.uploadImg);
 
   // user
   router.get('/create/admin/:password', controller.user.createAdmin);

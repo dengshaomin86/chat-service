@@ -17,7 +17,7 @@ const groupPublic = {
 };
 
 // 群聊储存字段
-const storeMsgKey = ["msgType", "msg", "fromUsername", "fromUserId", "createTime"];
+const storeMsgKey = ["msgType", "msg", "msgId", "fromUsername", "fromUserId", "createTime"];
 
 // 获取群聊名称
 const getGroupName = (groupName, members) => {
@@ -42,6 +42,11 @@ const createSingleId = (fromUserId, toUserId) => {
   return `${Math.min(fromUserId, toUserId)}${Math.max(fromUserId, toUserId)}`;
 };
 
+// 创建消息ID
+const createMsgId = (randomLen = 4) => {
+  return `${new Date().getTime()}${Math.floor(Math.random() * Math.pow(10, randomLen))}`;
+};
+
 module.exports = {
   avatarDefault,
   admin,
@@ -50,4 +55,5 @@ module.exports = {
   getGroupName,
   getFriendStatusText,
   createSingleId,
+  createMsgId,
 };

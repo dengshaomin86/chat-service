@@ -3,7 +3,7 @@
 const {Service} = require('egg');
 const {pick} = require('lodash');
 
-const {groupPublic, storeMsgKey, getGroupName} = require("../core/baseConfig");
+const {groupPublic, storeMsgKey, getGroupName, createMsgId} = require("../core/baseConfig");
 
 class GroupService extends Service {
   // 创建群聊ID
@@ -27,6 +27,7 @@ class GroupService extends Service {
       groupId: groupPublic.groupId,
       msgType: "1",
       msg: groupPublic.msg,
+      msgId: createMsgId(),
       fromUsername: username,
       fromUserId: userId,
       createTime: new Date().getTime(),
@@ -66,6 +67,7 @@ class GroupService extends Service {
         groupId: res.groupId,
         msgType: "1",
         msg: "欢迎加入群聊",
+        msgId: createMsgId(),
         fromUsername: username,
         fromUserId: userId,
         createTime: new Date().getTime(),
