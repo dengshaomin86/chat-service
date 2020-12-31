@@ -58,7 +58,6 @@ module.exports = app => {
   router.delete('/group/disband/:groupId', userAuth, controller.group.disband);
 
   // socket
-  io.of('/').route('message', controller.message.message);
   io.of('/').route('messageSingle', controller.message.messageSingle);
   io.of('/').route('messageGroup', controller.message.messageGroup);
   io.of('/').route('joinRoom', controller.message.joinRoom);
