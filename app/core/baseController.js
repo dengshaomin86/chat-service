@@ -1,9 +1,9 @@
 'use strict';
 
-const {Controller} = require('egg');
-const fs = require("fs");
-const path = require("path");
-const moment = require("moment");
+const { Controller } = require('egg');
+const fs = require('fs');
+const path = require('path');
+const moment = require('moment');
 // 故名思意 异步二进制 写入流
 const awaitWriteStream = require('await-stream-ready').write;
 // 管道读入一个虫洞
@@ -15,17 +15,23 @@ class BaseController extends Controller {
   }
 
   success(data) {
-    this.ctx.body = Object.assign({
-      flag: true,
-      message: "success"
-    }, data);
+    this.ctx.body = Object.assign(
+      {
+        flag: true,
+        message: 'success',
+      },
+      data,
+    );
   }
 
   error(data) {
-    this.ctx.body = Object.assign({
-      flag: false,
-      message: "error"
-    }, data);
+    this.ctx.body = Object.assign(
+      {
+        flag: false,
+        message: 'error',
+      },
+      data,
+    );
   }
 
   notFound(msg) {
@@ -35,16 +41,13 @@ class BaseController extends Controller {
 
   // 上传文件的通用方法
   async upload() {
-    console.log(111);
     const stream = await this.ctx.getFileStream();
     // 基础的目录
-    const uploadBasePath = 'app/public/upload';
+    const uploadBasePath = 'app/public/static/upload';
     // 分类目录
-    console.log(stream.fieldname);
     const category = stream.fieldname;
     // 生成文件名
-    const filename = `${moment().format("YYYYMMDDHHmmss")}_${parseInt(Math.random() * 1e6,)}${path.extname(stream.filename).toLocaleLowerCase()}`;
-    console.log(filename);
+    const filename = `${moment().format('YYYYMMDDHHmmss')}_${parseInt(Math.random() * 1e6)}${path.extname(stream.filename).toLocaleLowerCase()}`;
     // 生成目录
     function mkdirsSync(dirname) {
       if (fs.existsSync(dirname)) {
@@ -72,7 +75,7 @@ class BaseController extends Controller {
       };
     }
     return {
-      url: path.join('/static', category, filename).replace(/\\/g, "/"),
+      url: path.join('/static/upload', category, filename).replace(/\\/g, '/'),
       fields: stream.fields,
     };
   }
