@@ -11,9 +11,9 @@
 /**
  * @param {Egg.Application} app - egg application
  */
-module.exports = app => {
-  const {router, controller, io} = app;
-  const gzip = app.middleware.gzip({threshold: 1024});
+module.exports = (app) => {
+  const { router, controller, io } = app;
+  const gzip = app.middleware.gzip({ threshold: 1024 });
   const userAuth = app.middleware.userauth({}, app);
 
   // views

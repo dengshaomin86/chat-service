@@ -1,9 +1,9 @@
 'use strict';
 
-const {avatarDefault} = require('../core/baseConfig');
+const { defaultAvatar } = require('@config/constants');
 
 // 聊天列表
-module.exports = app => {
+module.exports = (app) => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
 
@@ -23,28 +23,28 @@ module.exports = app => {
     },
     avatar: {
       type: String,
-      default: () => avatarDefault
+      default: () => defaultAvatar,
     },
     // 群公告
     announcement: {
       type: String,
-      default: ""
+      default: '',
     },
     // 群聊成员
     members: {
       type: Array,
       required: true,
-      default: () => []
+      default: () => [],
     },
     // 是否已解散
     disband: {
       type: Boolean,
-      default: false
+      default: false,
     },
     createDate: {
       type: String,
-      default: () => new Date().getTime()
-    }
+      default: () => new Date().getTime(),
+    },
   });
   return mongoose.model('Group', GroupSchema);
 };

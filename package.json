@@ -14,11 +14,13 @@
     "egg-scripts": "^2.11.0",
     "egg-socket.io": "^4.1.6",
     "egg-view-ejs": "^2.0.1",
+    "module-alias": "^2.2.2",
     "moment": "^2.27.0"
   },
   "devDependencies": {
     "autod": "^3.0.1",
     "autod-egg": "^1.1.0",
+    "babel-eslint": "^10.1.0",
     "egg-bin": "^4.11.0",
     "egg-ci": "^1.11.0",
     "egg-mock": "^3.21.0",
@@ -39,6 +41,10 @@
     "lint": "eslint .",
     "ci": "npm run lint && npm run cov",
     "autod": "autod"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@config": "config"
   },
   "ci": {
     "version": "10"

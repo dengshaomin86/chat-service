@@ -1,8 +1,8 @@
 'use strict';
 
-const {avatarDefault} = require('../core/baseConfig');
+const { defaultAvatar } = require('@config/constants');
 
-module.exports = app => {
+module.exports = (app) => {
   const mongoose = app.mongoose;
   const Schema = mongoose.Schema;
 
@@ -16,7 +16,7 @@ module.exports = app => {
     },
     usernameLowercase: {
       type: String,
-      lowercase: true
+      lowercase: true,
     },
     userId: {
       type: String,
@@ -31,34 +31,34 @@ module.exports = app => {
     },
     avatar: {
       type: String,
-      default: () => avatarDefault
+      default: () => defaultAvatar,
     },
     nickname: {
       type: String,
-      default: () => ""
+      default: () => '',
     },
     // 性别：0保密；1男；2女
     sex: {
       type: String,
-      default: () => "0"
+      default: () => '0',
     },
     hobby: {
       type: String,
-      default: () => ""
+      default: () => '',
     },
     signature: {
       type: String,
-      default: () => ""
+      default: () => '',
     },
     // 用户所在群聊
     group: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     createDate: {
       type: String,
-      default: () => new Date().getTime()
-    }
+      default: () => new Date().getTime(),
+    },
   });
   return mongoose.model('User', UserSchema);
 };
