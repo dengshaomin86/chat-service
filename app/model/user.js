@@ -1,6 +1,6 @@
 'use strict';
 
-const { defaultAvatar } = require('@config/constants');
+const { defaultAvatar } = require('@/config/constants');
 
 module.exports = (app) => {
   const mongoose = app.mongoose;

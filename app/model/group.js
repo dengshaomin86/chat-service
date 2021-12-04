@@ -1,6 +1,6 @@
 'use strict';
 
-const { defaultAvatar } = require('@config/constants');
+const { defaultAvatar } = require('@/config/constants');
 
 // 聊天列表
 module.exports = (app) => {

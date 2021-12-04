@@ -3,6 +3,11 @@
  */
 const path = require('path');
 
+// 设置别名
+require('node-require-alias').setAlias({
+  '@': path.join(__dirname, '../'),
+});
+
 /**
  * @param {Egg.EggAppInfo} appInfo app info
  */
