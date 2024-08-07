@@ -38,8 +38,8 @@ module.exports = (appInfo) => {
       url: 'mongodb://127.0.0.1:27017/chatEgg',
       options: {
         useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
+        // useCreateIndex: true,
+        // useFindAndModify: false,
       },
     },
   };
@@ -52,11 +52,13 @@ module.exports = (appInfo) => {
     domainWhiteList: ['*'],
   };
   config.cors = {
-    // origin: ['*'],
-    origin: ['http://localhost:8080'],
+    origin: '*',
+    // origin: ["http://localhost:8080"],
     credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
   };
+
+  config.proxy = true;
 
   // session
   config.session = {
@@ -65,6 +67,9 @@ module.exports = (appInfo) => {
     httpOnly: true,
     encrypt: true,
     renew: true, // renew等于true 那么每次刷新页面的时候 session都会被延期
+    // domain: ".github.io",
+    sameSite: 'none',
+    secure: true,
   };
 
   // socket.io
