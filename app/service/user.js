@@ -69,11 +69,18 @@ class UserService extends Service {
 
       if (user) return reject('用户已存在');
       if (password !== cfPassword) return reject('密码不一致，请重新输入');
+      if (username.length < 2) return reject('用户名长度不能小于2');
+      if (password.length < 2) return reject('密码长度不能小于2');
 
       // 创建用户
       const userId = await this.createUserId();
       const group = [groupPublic.groupId];
-      const result = await ctx.model.User.create({ username, password, userId, group });
+      const result = await ctx.model.User.create({ username, password, userId, group }).catch((err) => {
+        reject(err.message);
+        return null;
+      });
+
+      if (!result) return;
 
       // 加入公共群聊
       await ctx.service.group.appendGroup({
@@ -204,8 +211,10 @@ class UserService extends Service {
         if (editable.includes(key)) newInfo[key] = info[key];
       }
 
-      let result = await ctx.model.User.updateOne({ userId }, newInfo);
-      if (!result.n) return reject('修改失败');
+      let result = await ctx.model.User.updateOne({ userId }, newInfo).catch((err) => {
+        ctx.logger.error(err);
+      });
+      if (!result.modifiedCount) return reject('修改失败');
 
       const user = await ctx.service.user.info(userId);
       resolve(user);
