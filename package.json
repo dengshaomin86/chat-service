@@ -1,54 +1,46 @@
 {
-  "name": "chat-service",
+  "name": "assistant-service2",
   "version": "1.0.0",
-  "description": "chat service",
+  "description": "",
   "private": true,
   "egg": {
     "declarations": true
   },
   "dependencies": {
     "await-stream-ready": "^1.0.1",
-    "egg": "^2.15.1",
-    "egg-cors": "^2.2.3",
-    "egg-mongoose": "^3.2.0",
-    "egg-scripts": "^2.11.0",
+    "crypto-js": "^4.2.0",
+    "egg": "^3.17.5",
+    "egg-cors": "^3.0.1",
+    "egg-mongoose": "^4.0.1",
+    "egg-scripts": "2",
     "egg-socket.io": "^4.1.6",
-    "egg-view-ejs": "^2.0.1",
-    "moment": "^2.27.0",
+    "egg-view-ejs": "^3.0.0",
+    "moment": "^2.30.1",
     "node-require-alias": "^1.0.1"
   },
   "devDependencies": {
-    "autod": "^3.0.1",
-    "autod-egg": "^1.1.0",
-    "babel-eslint": "^10.1.0",
-    "egg-bin": "^4.11.0",
-    "egg-ci": "^1.11.0",
-    "egg-mock": "^3.21.0",
-    "eslint": "^5.13.0",
-    "eslint-config-egg": "^7.1.0"
+    "egg-bin": "6",
+    "egg-mock": "5",
+    "eslint": "8",
+    "eslint-config-egg": "13"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-chat-service",
-    "stop": "egg-scripts stop --title=egg-server-chat-service",
-    "dev": "egg-bin dev --port 3000",
-    "debug": "egg-bin debug",
-    "test": "npm run lint -- --fix && npm run test-local",
-    "test-local": "egg-bin test",
+    "start": "egg-scripts start --daemon --title=egg-server-assistant-service2",
+    "stop": "egg-scripts stop --title=egg-server-assistant-service2",
+    "dev": "egg-bin dev",
+    "test": "npm run lint -- --fix && npm run test:local",
+    "test:local": "egg-bin test",
     "cov": "egg-bin cov",
     "lint": "eslint .",
-    "ci": "npm run lint && npm run cov",
-    "autod": "autod"
-  },
-  "ci": {
-    "version": "10"
+    "ci": "npm run lint && npm run cov"
   },
   "repository": {
     "type": "git",
     "url": ""
   },
-  "author": "M1n90",
+  "author": "",
   "license": "MIT"
 }
